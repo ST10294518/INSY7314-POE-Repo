@@ -1,4 +1,4 @@
-# HustleHub+ - Secure Backend Foundations (Part 1)
+# HustleHub+ : Secure Backend Foundations (Part 1) 
 
 HustleHub+ is a secure freelance marketplace platform being built incrementally across three POE stages. **This submission covers Part 1 only**: the secure backend foundation supporting user registration and authentication.
 
@@ -88,7 +88,7 @@ npm run dev     # nodemon, auto-restart
 npm start
 ```
 
-The API will be available at `https://localhost:5443` (your browser/Postman will warn about the self-signed cert — this is expected in a local dev environment).
+The API will be available at `https://localhost:5443` (your browser/Postman will warn about the self-signed cert - this is expected in a local dev environment).
 
 ## 4. API Endpoints
 
@@ -113,7 +113,7 @@ All registration and login input is validated with `express-validator` before it
 The API only runs over HTTPS, using a locally generated SSL certificate loaded in `server.js`. If the certificate files are missing or unreadable, the server refuses to start rather than falling back to plain HTTP. This protects credentials and tokens in transit from interception, even in local development.
 
 **Safe error handling**
-A centralised error handler ensures no internal details — stack traces, file paths, or environment values — are ever returned to the client. Unexpected errors return a generic `500` message while being logged server-side for debugging; malformed JSON bodies are caught and return a clean `400`.
+A centralised error handler ensures no internal details - stack traces, file paths, or environment values - are ever returned to the client. Unexpected errors return a generic `500` message while being logged server-side for debugging; malformed JSON bodies are caught and return a clean `400`.
 
 ## 6. Testing
 
