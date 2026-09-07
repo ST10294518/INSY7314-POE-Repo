@@ -1,4 +1,4 @@
-# HustleHub+ — Secure Backend Foundations (Part 1)
+# HustleHub+ - Secure Backend Foundations (Part 1)
 
 HustleHub+ is a secure freelance marketplace platform being built incrementally across three POE stages. **This submission covers Part 1 only**: the secure backend foundation supporting user registration and authentication.
 
@@ -11,11 +11,11 @@ LINK: https://youtu.be/7Gcj34gJVoY
 HustleHub+ will eventually let **freelancers** advertise services, **clients** browse and book them, and the platform will track resulting income and estimated tax for freelancers. Security is treated as a core requirement throughout, not an add-on.
 
 **Intended users (full system):**
-- **Clients** — browse gigs, make bookings
-- **Freelancers** — list gigs, manage bookings, track income/tax
-- **Admins** — platform oversight (later parts)
+- **Clients** - browse gigs, make bookings
+- **Freelancers** - list gigs, manage bookings, track income/tax
+- **Admins** - platform oversight (later parts)
 
-**Part 1 scope:** only the authentication layer — registration, login, and JWT-protected routes. Marketplace features (gigs, bookings, transactions, tax) are out of scope until Part 2/3.
+**Part 1 scope:** only the authentication layer - registration, login, and JWT-protected routes. Marketplace features (gigs, bookings, transactions, tax) are out of scope until Part 2/3.
 
 ## 2. Project Structure
 
