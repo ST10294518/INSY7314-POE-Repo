@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="HustleHub Part 2 - Endpoint Rate Limits" tests="34" time="7.444">
+  <testsuite name="Registration 1: create rate-test Client" id="cd537f67-8317-4aef-a7bf-80f01c94fdfa" timestamp="2026-10-12T15:42:36.335Z" tests="2" failures="0" errors="0" time="0.850">
+    <testcase name="HTTP 201" time="0.850" classname="Registration1CreateRateTestClient"/>
+    <testcase name="Client created" time="0.850" classname="Registration1CreateRateTestClient"/>
+  </testsuite>
+  <testsuite name="Successful login 1 does not consume failed allowance" id="556818fb-2b80-4d23-90b5-f7674fbc9798" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.655">
+    <testcase name="HTTP 200" time="0.655" classname="SuccessfulLogin1DoesNotConsumeFailedAllowance"/>
+  </testsuite>
+  <testsuite name="Successful login 2 does not consume failed allowance" id="d1e21756-ac7e-43ab-b050-5f3005e01ab4" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.572">
+    <testcase name="HTTP 200" time="0.572" classname="SuccessfulLogin2DoesNotConsumeFailedAllowance"/>
+  </testsuite>
+  <testsuite name="Successful login 3 does not consume failed allowance" id="55101e72-136d-4258-b64f-d0ddfce0d315" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.530">
+    <testcase name="HTTP 200" time="0.530" classname="SuccessfulLogin3DoesNotConsumeFailedAllowance"/>
+  </testsuite>
+  <testsuite name="Successful login 4 does not consume failed allowance" id="c0666ec4-6d3a-4cda-bb1f-f43be04b8e06" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.523">
+    <testcase name="HTTP 200" time="0.523" classname="SuccessfulLogin4DoesNotConsumeFailedAllowance"/>
+  </testsuite>
+  <testsuite name="Successful login 5 does not consume failed allowance" id="4ab94162-388f-42eb-88e4-fe4f3fa34d5f" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.539">
+    <testcase name="HTTP 200" time="0.539" classname="SuccessfulLogin5DoesNotConsumeFailedAllowance"/>
+  </testsuite>
+  <testsuite name="Successful login 6 does not consume failed allowance" id="e7d28f9c-17a3-43e0-8cfc-bdb5619045bd" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.571">
+    <testcase name="HTTP 200" time="0.571" classname="SuccessfulLogin6DoesNotConsumeFailedAllowance"/>
+  </testsuite>
+  <testsuite name="Failed login 1" id="4b25c848-3809-4304-9a46-abdca4e927bc" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.542">
+    <testcase name="HTTP 401" time="0.542" classname="FailedLogin1"/>
+  </testsuite>
+  <testsuite name="Failed login 2" id="6ebae696-fdf7-4bf6-83ad-83007a5d8b24" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.524">
+    <testcase name="HTTP 401" time="0.524" classname="FailedLogin2"/>
+  </testsuite>
+  <testsuite name="Failed login 3" id="8a71efa2-cf5e-4295-84ca-61d9c9d5cdc1" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.528">
+    <testcase name="HTTP 401" time="0.528" classname="FailedLogin3"/>
+  </testsuite>
+  <testsuite name="Failed login 4" id="6f285800-28d7-47c8-931d-a302fe0adc74" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.521">
+    <testcase name="HTTP 401" time="0.521" classname="FailedLogin4"/>
+  </testsuite>
+  <testsuite name="Failed login 5" id="e68e7b1e-5597-4fac-b6ee-415cdc25e450" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.547">
+    <testcase name="HTTP 401" time="0.547" classname="FailedLogin5"/>
+  </testsuite>
+  <testsuite name="Failed login 6" id="a3bb7b3f-06ba-4187-bc45-ce6ea00ccdd9" timestamp="2026-10-12T15:42:36.335Z" tests="4" failures="0" errors="0" time="0.052">
+    <testcase name="HTTP 429" time="0.052" classname="FailedLogin6"/>
+    <testcase name="Retry-After supplied" time="0.052" classname="FailedLogin6"/>
+    <testcase name="RateLimit header supplied" time="0.052" classname="FailedLogin6"/>
+    <testcase name="Safe limit message" time="0.052" classname="FailedLogin6"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 1" id="7efb5974-511a-430c-86ef-dba1baf83bf2" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.039">
+    <testcase name="HTTP 400" time="0.039" classname="AuthenticatedBookingRequest1"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 2" id="cb018e4b-3623-4674-a1b9-6616cbe30937" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.036">
+    <testcase name="HTTP 400" time="0.036" classname="AuthenticatedBookingRequest2"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 3" id="ef5705cc-c93a-4440-8bcc-1f740dfe9535" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.035">
+    <testcase name="HTTP 400" time="0.035" classname="AuthenticatedBookingRequest3"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 4" id="af0e5424-96ad-48de-8cd9-6cb9f0b459f1" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.038">
+    <testcase name="HTTP 400" time="0.038" classname="AuthenticatedBookingRequest4"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 5" id="25809aa0-8e1b-4758-800a-7f8941fd09f6" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.039">
+    <testcase name="HTTP 400" time="0.039" classname="AuthenticatedBookingRequest5"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 6" id="2dc0adbe-2d51-4ee0-835d-9ea013a2b87a" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.036">
+    <testcase name="HTTP 400" time="0.036" classname="AuthenticatedBookingRequest6"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 7" id="27567ddb-7962-450e-955e-bfc22a2c204a" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.036">
+    <testcase name="HTTP 400" time="0.036" classname="AuthenticatedBookingRequest7"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 8" id="64d90756-ac89-4cb5-bd9f-c12f3cf4ebbe" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.036">
+    <testcase name="HTTP 400" time="0.036" classname="AuthenticatedBookingRequest8"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 9" id="aae4a98c-5975-443c-a2dd-50893cb7c889" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.039">
+    <testcase name="HTTP 400" time="0.039" classname="AuthenticatedBookingRequest9"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 10" id="459d2971-b993-40ce-885e-7fd08fa30995" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.038">
+    <testcase name="HTTP 400" time="0.038" classname="AuthenticatedBookingRequest10"/>
+  </testsuite>
+  <testsuite name="Authenticated Booking request 11" id="9c75da07-a267-45b9-b84a-3025766e47b5" timestamp="2026-10-12T15:42:36.335Z" tests="4" failures="0" errors="0" time="0.036">
+    <testcase name="HTTP 429" time="0.036" classname="AuthenticatedBookingRequest11"/>
+    <testcase name="Retry-After supplied" time="0.036" classname="AuthenticatedBookingRequest11"/>
+    <testcase name="RateLimit header supplied" time="0.036" classname="AuthenticatedBookingRequest11"/>
+    <testcase name="Safe limit message" time="0.036" classname="AuthenticatedBookingRequest11"/>
+  </testsuite>
+  <testsuite name="Registration request 2" id="017cbd9d-56f0-402b-94aa-87df7389aebc" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="HTTP 400" time="0.009" classname="RegistrationRequest2"/>
+  </testsuite>
+  <testsuite name="Registration request 3" id="696b80e8-8b2c-4361-be5b-9717aa4dc268" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="HTTP 400" time="0.008" classname="RegistrationRequest3"/>
+  </testsuite>
+  <testsuite name="Registration request 4" id="2c0826b1-54b6-47cb-a2fb-d7f750b6f47e" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="HTTP 400" time="0.012" classname="RegistrationRequest4"/>
+  </testsuite>
+  <testsuite name="Registration request 5" id="fafb0fcb-7f9f-4e05-a477-2ba26a0bfdad" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="HTTP 400" time="0.008" classname="RegistrationRequest5"/>
+  </testsuite>
+  <testsuite name="Registration request 6" id="f122bfa5-febc-4278-97b2-6515af049f2d" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 400" time="0.007" classname="RegistrationRequest6"/>
+  </testsuite>
+  <testsuite name="Registration request 7" id="29d7f697-42b5-4258-93cc-94daf109e990" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="HTTP 400" time="0.006" classname="RegistrationRequest7"/>
+  </testsuite>
+  <testsuite name="Registration request 8" id="80921739-da1a-4e82-937e-335fa7fe6759" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="HTTP 400" time="0.008" classname="RegistrationRequest8"/>
+  </testsuite>
+  <testsuite name="Registration request 9" id="d676d131-1ae6-43ac-a80a-02be89fa098d" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="HTTP 400" time="0.008" classname="RegistrationRequest9"/>
+  </testsuite>
+  <testsuite name="Registration request 10" id="6bf70a82-9573-4dfa-92d5-443ebda76cc1" timestamp="2026-10-12T15:42:36.335Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="HTTP 400" time="0.009" classname="RegistrationRequest10"/>
+  </testsuite>
+  <testsuite name="Registration request 11" id="c8604c86-acb0-40ae-b05d-0118feb7627d" timestamp="2026-10-12T15:42:36.335Z" tests="4" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 429" time="0.007" classname="RegistrationRequest11"/>
+    <testcase name="Retry-After supplied" time="0.007" classname="RegistrationRequest11"/>
+    <testcase name="RateLimit header supplied" time="0.007" classname="RegistrationRequest11"/>
+    <testcase name="Safe limit message" time="0.007" classname="RegistrationRequest11"/>
+  </testsuite>
+</testsuites>

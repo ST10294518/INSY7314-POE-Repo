@@ -1,0 +1,1217 @@
+{
+  "info": {
+    "name": "HustleHub Part 2 - Booking and Transaction Integration",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Creates four test accounts, two Gigs and one completed Booking/Transaction. Records remain for inspection. Rate-limit testing is separate."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:5443"
+    },
+    {
+      "key": "invalidToken",
+      "value": "invalid-test-token"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.variables.get('integrationInitialised')) {",
+          "  const suffix = pm.variables.replaceIn('{{$guid}}');",
+          "  for (const name of ['owner', 'otherFreelancer', 'client', 'otherClient']) {",
+          "    pm.variables.set(name + 'Email', 'integration-' + name.toLowerCase() + '-' + suffix + '@example.com');",
+          "  }",
+          "  pm.variables.set('testPassword', 'IntegrationPass9!' + suffix);",
+          "  pm.variables.set('bookingKey', pm.variables.replaceIn('{{$guid}}'));",
+          "  pm.variables.set('freshKey', pm.variables.replaceIn('{{$guid}}'));",
+          "  pm.variables.set('integrationInitialised', true);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Register owner",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"role\": \"freelancer\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "const result = pm.response.json();",
+              "pm.variables.set('ownerToken', result.token);",
+              "pm.variables.set('ownerId', result.user.id);",
+              "pm.test('Correct role', () => pm.expect(result.user.role).to.eql('freelancer'));",
+              "pm.test('Password excluded', () => pm.expect(result.user).not.to.have.property('passwordHash'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register otherFreelancer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{otherFreelancerEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"role\": \"freelancer\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "const result = pm.response.json();",
+              "pm.variables.set('otherFreelancerToken', result.token);",
+              "pm.variables.set('otherFreelancerId', result.user.id);",
+              "pm.test('Correct role', () => pm.expect(result.user.role).to.eql('freelancer'));",
+              "pm.test('Password excluded', () => pm.expect(result.user).not.to.have.property('passwordHash'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register client",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{clientEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"role\": \"client\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "const result = pm.response.json();",
+              "pm.variables.set('clientToken', result.token);",
+              "pm.variables.set('clientId', result.user.id);",
+              "pm.test('Correct role', () => pm.expect(result.user.role).to.eql('client'));",
+              "pm.test('Password excluded', () => pm.expect(result.user).not.to.have.property('passwordHash'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register otherClient",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{otherClientEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"role\": \"client\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "const result = pm.response.json();",
+              "pm.variables.set('otherClientToken', result.token);",
+              "pm.variables.set('otherClientId', result.user.id);",
+              "pm.test('Correct role', () => pm.expect(result.user.role).to.eql('client'));",
+              "pm.test('Password excluded', () => pm.expect(result.user).not.to.have.property('passwordHash'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create gig",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ownerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/gigs",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Integration gig\",\n  \"description\": \"Service created for automated booking integration testing.\",\n  \"price\": 125.5,\n  \"category\": \"Testing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "pm.variables.set('gigId', pm.response.json().gig._id);",
+              "pm.test('Trusted price saved', () => pm.expect(pm.response.json().gig.price).to.eql(125.50));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create secondGig",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ownerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/gigs",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Integration secondGig\",\n  \"description\": \"Service created for automated booking integration testing.\",\n  \"price\": 125.5,\n  \"category\": \"Testing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "pm.variables.set('secondGigId', pm.response.json().gig._id);",
+              "pm.test('Trusted price saved', () => pm.expect(pm.response.json().gig.price).to.eql(125.50));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Starting Freelancer income",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ownerToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/transactions/income"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.variables.set('startingIncome', result.totalIncome);",
+              "pm.variables.set('startingCount', result.completedTransactions);",
+              "pm.test('New account starts at zero', () => pm.expect(result.totalIncome).to.eql(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Client creates Booking and Transaction",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{bookingKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gigId\": \"{{gigId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "const result = pm.response.json();",
+              "pm.variables.set('bookingId', result.booking._id);",
+              "pm.variables.set('transactionId', result.transaction._id);",
+              "pm.test('Booking confirmed', () => pm.expect(result.booking.status).to.eql('confirmed'));",
+              "pm.test('Transaction completed', () => pm.expect(result.transaction.status).to.eql('completed'));",
+              "pm.test('Transaction links to Booking', () => pm.expect(result.transaction.booking).to.eql(result.booking._id));",
+              "pm.test('Client assigned from JWT', () => pm.expect(result.booking.client).to.eql(pm.variables.get('clientId')));",
+              "pm.test('Freelancer assigned from Gig', () => pm.expect(result.booking.freelancer).to.eql(pm.variables.get('ownerId')));",
+              "pm.test('Booking uses saved price', () => pm.expect(result.booking.price).to.eql(125.50));",
+              "pm.test('Transaction uses saved price', () => pm.expect(result.transaction.amount).to.eql(125.50));",
+              "pm.test('Transaction identities match', () => { pm.expect(result.transaction.client).to.eql(result.booking.client); pm.expect(result.transaction.freelancer).to.eql(result.booking.freelancer); });",
+              "pm.test('First operation is new', () => pm.expect(result.reused).to.eql(false));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Same-key retry reuses original records",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{bookingKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gigId\": \"{{gigId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Retry marked reused', () => pm.expect(result.reused).to.eql(true));",
+              "pm.test('Same Booking ID', () => pm.expect(result.booking._id).to.eql(pm.variables.get('bookingId')));",
+              "pm.test('Same Transaction ID', () => pm.expect(result.transaction._id).to.eql(pm.variables.get('transactionId')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Same key with different Gig rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{bookingKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gigId\": \"{{secondGigId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Client sees exactly one Booking",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/mine"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const bookings = pm.response.json().bookings;",
+              "pm.test('Only one Booking after retry', () => pm.expect(bookings).to.have.lengthOf(1));",
+              "pm.test('Correct Booking returned', () => pm.expect(bookings[0]._id).to.eql(pm.variables.get('bookingId')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Freelancer receives matching Booking",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ownerToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/freelancer"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const bookings = pm.response.json().bookings;",
+              "pm.test('One received Booking', () => pm.expect(bookings).to.have.lengthOf(1));",
+              "pm.test('Correct Client populated', () => pm.expect(bookings[0].client._id).to.eql(pm.variables.get('clientId')));",
+              "pm.test('Correct Gig populated', () => pm.expect(bookings[0].gig._id).to.eql(pm.variables.get('gigId')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Client views Booking",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Owning Freelancer views Booking",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ownerToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Unrelated Client views Booking",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{otherClientToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Unrelated Freelancer views Booking",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{otherFreelancerToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Other Client history stays empty",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{otherClientToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/mine"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Other Client sees no Bookings', () => pm.expect(pm.response.json().bookings).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Other Freelancer received list stays empty",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{otherFreelancerToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/freelancer"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Other Freelancer sees no Bookings', () => pm.expect(pm.response.json().bookings).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Freelancer cannot create Booking",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ownerToken}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{freshKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gigId\": \"{{gigId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Client cannot access Freelancer Booking list",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/freelancer"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Freelancer cannot access Client Booking list",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ownerToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/mine"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Submitted price rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{freshKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gigId\": \"{{gigId}}\",\n  \"price\": 0.01\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Submitted identity rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{freshKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gigId\": \"{{gigId}}\",\n  \"freelancer\": \"{{otherFreelancerId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Injection object rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{freshKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gigId\": {\n    \"$ne\": null\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Missing idempotency key rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gigId\": \"{{gigId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Nonexistent Gig rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{freshKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gigId\": \"000000000000000000000000\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Missing JWT cannot view Booking",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid JWT cannot view Booking",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{invalidToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Expired JWT cannot view Booking",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{expiredToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid Booking ID rejected",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/invalid-id"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Nonexistent Booking returns 404",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings/000000000000000000000000"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exactly one matching Transaction",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ownerToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/transactions/mine"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const transactions = pm.response.json().transactions;",
+              "pm.test('Retry created no duplicate Transaction', () => pm.expect(transactions).to.have.lengthOf(1));",
+              "pm.test('Correct Transaction ID', () => pm.expect(transactions[0]._id).to.eql(pm.variables.get('transactionId')));",
+              "pm.test('Populated Booking matches', () => pm.expect(transactions[0].booking._id).to.eql(pm.variables.get('bookingId')));",
+              "pm.test('Saved amount unchanged', () => pm.expect(transactions[0].amount).to.eql(125.50));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Income increases exactly once",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ownerToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/transactions/income"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Currency is ZAR', () => pm.expect(result.currency).to.eql('ZAR'));",
+              "pm.test('Income increased by 125.50', () => pm.expect(result.totalIncome).to.eql(Number(pm.variables.get('startingIncome')) + 125.50));",
+              "pm.test('Count increased by one', () => pm.expect(result.completedTransactions).to.eql(Number(pm.variables.get('startingCount')) + 1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Other Freelancer income stays zero",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{otherFreelancerToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/transactions/income"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Income isolated', () => pm.expect(pm.response.json().totalIncome).to.eql(0));",
+              "pm.test('Count isolated', () => pm.expect(pm.response.json().completedTransactions).to.eql(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Other Freelancer transactions stay empty",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{otherFreelancerToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/transactions/mine"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Transactions isolated', () => pm.expect(pm.response.json().transactions).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Client cannot access income",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/transactions/income"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Client cannot access Transaction history",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clientToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/transactions/mine"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transaction history requires JWT",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/transactions/mine"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

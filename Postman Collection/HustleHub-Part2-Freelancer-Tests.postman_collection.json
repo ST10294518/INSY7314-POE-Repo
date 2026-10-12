@@ -1,0 +1,1513 @@
+{
+  "info": {
+    "name": "HustleHub Part 2 - Member 1 Authentication and Gigs",
+    "description": "Run the complete collection in order. Creates three test accounts and tests only gigs created during this run. Credentials and tokens are generated or stored as local run variables. Set expiredToken locally before running. It must be a correctly signed token whose expiry is in the past. Never put JWT_SECRET in Postman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:5443",
+      "type": "string"
+    },
+    {
+      "key": "invalidToken",
+      "value": "invalid-test-token",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "API health and initialise test accounts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const runId = pm.variables.replaceIn('{{$randomUUID}}');",
+                  "pm.variables.set('ownerEmail', `poe-owner-${runId}@example.com`);",
+                  "pm.variables.set('otherEmail', `poe-other-${runId}@example.com`);",
+                  "pm.variables.set('clientEmail', `poe-client-${runId}@example.com`);",
+                  "pm.variables.set('testPassword', `PoeTest9!${runId}`);",
+                  "['ownerToken', 'otherToken', 'clientToken', 'ownerId', 'otherId', 'clientId', 'gigId'].forEach(key => pm.variables.unset(key));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Health response', () => pm.expect(pm.response.json().message).to.eql('HustleHub API is running.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register Gig owner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"role\": \"freelancer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  pm.test('Correct account role', () => pm.expect(data.user.role).to.eql('freelancer'));",
+                  "  pm.test('MongoDB user ID returned', () => pm.expect(data.user.id).to.match(/^[a-f0-9]{24}$/i));",
+                  "  pm.test('Password fields excluded', () => {",
+                  "    pm.expect(data.user).not.to.have.property('password');",
+                  "    pm.expect(data.user).not.to.have.property('passwordHash');",
+                  "  });",
+                  "  pm.test('JWT returned', () => pm.expect(typeof data.token === 'string' && data.token.length > 0).to.eql(true));",
+                  "  pm.variables.set('ownerToken', data.token);",
+                  "  pm.variables.set('ownerId', data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register second Freelancer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{otherEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"role\": \"freelancer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  pm.test('Correct account role', () => pm.expect(data.user.role).to.eql('freelancer'));",
+                  "  pm.test('MongoDB user ID returned', () => pm.expect(data.user.id).to.match(/^[a-f0-9]{24}$/i));",
+                  "  pm.test('Password fields excluded', () => {",
+                  "    pm.expect(data.user).not.to.have.property('password');",
+                  "    pm.expect(data.user).not.to.have.property('passwordHash');",
+                  "  });",
+                  "  pm.test('JWT returned', () => pm.expect(typeof data.token === 'string' && data.token.length > 0).to.eql(true));",
+                  "  pm.variables.set('otherToken', data.token);",
+                  "  pm.variables.set('otherId', data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register Client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{clientEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"role\": \"client\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  pm.test('Correct account role', () => pm.expect(data.user.role).to.eql('client'));",
+                  "  pm.test('MongoDB user ID returned', () => pm.expect(data.user.id).to.match(/^[a-f0-9]{24}$/i));",
+                  "  pm.test('Password fields excluded', () => {",
+                  "    pm.expect(data.user).not.to.have.property('password');",
+                  "    pm.expect(data.user).not.to.have.property('passwordHash');",
+                  "  });",
+                  "  pm.test('JWT returned', () => pm.expect(typeof data.token === 'string' && data.token.length > 0).to.eql(true));",
+                  "  pm.variables.set('clientToken', data.token);",
+                  "  pm.variables.set('clientId', data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Gig owner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json();",
+                  "  pm.test('Same registered account', () => pm.expect(data.user.id).to.eql(pm.variables.get('ownerId')));",
+                  "  pm.test('Password hash excluded', () => pm.expect(data.user).not.to.have.property('passwordHash'));",
+                  "  pm.variables.set('ownerToken', data.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Authenticated profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const user = pm.response.json().user;",
+                  "  pm.test('Correct profile', () => pm.expect(user.id).to.eql(pm.variables.get('ownerId')));",
+                  "  pm.test('Profile excludes password hash', () => pm.expect(user).not.to.have.property('passwordHash'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Duplicate registration rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"role\": \"freelancer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Incorrect password rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"IncorrectPassword9!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Generic login error', () => pm.expect(pm.response.json().message).to.eql('Invalid email or password.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Profile without JWT rejected",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Profile with invalid JWT rejected",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{invalidToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Public Admin registration rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{clientEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"role\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Email injection object rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": {\n    \"$ne\": null\n  },\n  \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Validation error response', () => pm.expect(pm.response.json().message).to.eql('Validation failed.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expired JWT profile rejected",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{expiredToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Expired JWT returns 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Safe expired-token response', () => pm.expect(pm.response.json().message).to.eql('Invalid or expired token.'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Gig Management",
+      "item": [
+        {
+          "name": "Freelancer creates Gig",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 100.5,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "  const gig = pm.response.json().gig;",
+                  "  pm.test('Owner assigned from JWT', () => pm.expect(gig.freelancer).to.eql(pm.variables.get('ownerId')));",
+                  "  pm.test('Correct saved price', () => pm.expect(gig.price).to.eql(100.50));",
+                  "  pm.test('Gig has MongoDB ID', () => pm.expect(gig._id).to.match(/^[a-f0-9]{24}$/i));",
+                  "  pm.test('Creation timestamp exists', () => pm.expect(Number.isNaN(Date.parse(gig.createdAt))).to.eql(false));",
+                  "  pm.variables.set('gigId', gig._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Public Gig browsing",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/gigs"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const gigs = pm.response.json().gigs;",
+                  "  pm.test('Gigs array returned', () => pm.expect(gigs).to.be.an('array'));",
+                  "  const gig = gigs.find(item => item._id === pm.variables.get('gigId'));",
+                  "  pm.test('Created Gig appears publicly', () => pm.expect(Boolean(gig)).to.eql(true));",
+                  "  if (gig) {",
+                  "    pm.test('Freelancer reference populated', () => pm.expect(gig.freelancer._id).to.eql(pm.variables.get('ownerId')));",
+                  "    pm.test('Freelancer password hash excluded', () => pm.expect(gig.freelancer).not.to.have.property('passwordHash'));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Owner lists own gigs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/mine"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const gigs = pm.response.json().gigs;",
+                  "  pm.test('Created Gig is in own list', () => pm.expect(gigs.some(g => g._id === pm.variables.get('gigId'))).to.eql(true));",
+                  "  pm.test('Every Gig belongs to this account', () => pm.expect(gigs.every(g => g.freelancer === pm.variables.get('ownerId'))).to.eql(true));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Second Freelancer cannot see owner Gig in own list",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{otherToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/mine"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const gigs = pm.response.json().gigs;",
+                  "  pm.test('Other owner Gig excluded', () => pm.expect(gigs.some(g => g._id === pm.variables.get('gigId'))).to.eql(false));",
+                  "  pm.test('Own-list ownership respected', () => pm.expect(gigs.every(g => g.freelancer === pm.variables.get('otherId'))).to.eql(true));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Public Gig details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const gig = pm.response.json().gig;",
+                  "  pm.test('Correct Gig returned', () => pm.expect(gig._id).to.eql(pm.variables.get('gigId')));",
+                  "  pm.test('Correct description', () => pm.expect(gig.description).to.eql('Temporary service created by the Member 1 API tests.'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Owner updates Gig",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig Updated\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 125.75,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const gig = pm.response.json().gig;",
+                  "  pm.test('Title updated', () => pm.expect(gig.title).to.eql('POE API Test Gig Updated'));",
+                  "  pm.test('Price updated', () => pm.expect(gig.price).to.eql(125.75));",
+                  "  pm.test('Ownership unchanged', () => pm.expect(gig.freelancer).to.eql(pm.variables.get('ownerId')));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Updated Gig persists",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('Saved update returned', () => pm.expect(pm.response.json().gig.price).to.eql(125.75));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Non-owner update rejected",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{otherToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 100.5,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Non-owner deletion rejected",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{otherToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client Gig creation rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clientToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 100.5,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client own-Gig route rejected",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clientToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/mine"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client Gig update rejected",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clientToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 100.5,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client Gig deletion rejected",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clientToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Creation without JWT rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 100.5,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Own-Gig list without JWT rejected",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/gigs/mine"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update without JWT rejected",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig Updated\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 125.75,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deletion without JWT rejected",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Creation with invalid JWT rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{invalidToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 100.5,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Missing title rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 100.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Validation failure returned', () => pm.expect(pm.response.json().message).to.eql('Validation failed.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Negative price rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": -10,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Validation failure returned', () => pm.expect(pm.response.json().message).to.eql('Validation failed.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Three decimal places rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 10.123,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Validation failure returned', () => pm.expect(pm.response.json().message).to.eql('Validation failed.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Title injection object rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": {\n    \"$ne\": null\n  },\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 100.5,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Validation failure returned', () => pm.expect(pm.response.json().message).to.eql('Validation failed.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Script description rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig\",\n  \"description\": \"<script>alert(1)</script>\",\n  \"price\": 100.5,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Validation failure returned', () => pm.expect(pm.response.json().message).to.eql('Validation failed.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Submitted owner identity rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 100.5,\n  \"category\": \"Testing\",\n  \"freelancer\": \"{{otherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Validation failure returned', () => pm.expect(pm.response.json().message).to.eql('Validation failed.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Owner reassignment rejected",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"POE API Test Gig Updated\",\n  \"description\": \"Temporary service created by the Member 1 API tests.\",\n  \"price\": 125.75,\n  \"category\": \"Testing\",\n  \"freelancer\": \"{{otherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid Gig ID rejected",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/gigs/invalid-id"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Missing Gig returns 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/gigs/000000000000000000000000"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rejected changes left Gig intact",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const gig = pm.response.json().gig;",
+                  "  pm.test('Saved title unchanged', () => pm.expect(gig.title).to.eql('POE API Test Gig Updated'));",
+                  "  pm.test('Saved price unchanged', () => pm.expect(gig.price).to.eql(125.75));",
+                  "  pm.test('Owner unchanged', () => pm.expect(gig.freelancer._id).to.eql(pm.variables.get('ownerId')));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expired JWT creation rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{expiredToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Expired Token Test\",\n  \"description\": \"This request must be rejected before any Gig is saved.\",\n  \"price\": 10,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Expired JWT returns 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Safe expired-token response', () => pm.expect(pm.response.json().message).to.eql('Invalid or expired token.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expired JWT own-Gig list rejected",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{expiredToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/mine"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Expired JWT returns 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Safe expired-token response', () => pm.expect(pm.response.json().message).to.eql('Invalid or expired token.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expired JWT update rejected",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{expiredToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Expired Token Test\",\n  \"description\": \"This request must be rejected before any Gig is saved.\",\n  \"price\": 10,\n  \"category\": \"Testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Expired JWT returns 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Safe expired-token response', () => pm.expect(pm.response.json().message).to.eql('Invalid or expired token.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expired JWT deletion rejected",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{expiredToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Expired JWT returns 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Safe expired-token response', () => pm.expect(pm.response.json().message).to.eql('Invalid or expired token.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Owner deletes test Gig",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Deletion confirmed', () => pm.expect(pm.response.json().message).to.eql('Gig deleted successfully.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deleted Gig returns 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/gigs/{{gigId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
