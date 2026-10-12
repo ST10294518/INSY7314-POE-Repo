@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="HustleHub Part 2 - Booking and Transaction Integration" tests="38" time="5.455">
+  <testsuite name="Register owner" id="fb2ffece-e90c-47ba-a817-bca19b7c280b" timestamp="2026-10-12T15:34:26.559Z" tests="3" failures="0" errors="0" time="0.957">
+    <testcase name="HTTP 201" time="0.957" classname="RegisterOwner"/>
+    <testcase name="Correct role" time="0.957" classname="RegisterOwner"/>
+    <testcase name="Password excluded" time="0.957" classname="RegisterOwner"/>
+  </testsuite>
+  <testsuite name="Register otherFreelancer" id="33812648-7bdb-495e-b129-bb72fbaa1567" timestamp="2026-10-12T15:34:26.559Z" tests="3" failures="0" errors="0" time="0.740">
+    <testcase name="HTTP 201" time="0.740" classname="RegisterOtherFreelancer"/>
+    <testcase name="Correct role" time="0.740" classname="RegisterOtherFreelancer"/>
+    <testcase name="Password excluded" time="0.740" classname="RegisterOtherFreelancer"/>
+  </testsuite>
+  <testsuite name="Register client" id="3eb1516e-01a5-46d5-8412-7bd226e605ac" timestamp="2026-10-12T15:34:26.559Z" tests="3" failures="0" errors="0" time="0.599">
+    <testcase name="HTTP 201" time="0.599" classname="RegisterClient"/>
+    <testcase name="Correct role" time="0.599" classname="RegisterClient"/>
+    <testcase name="Password excluded" time="0.599" classname="RegisterClient"/>
+  </testsuite>
+  <testsuite name="Register otherClient" id="d37b9098-ef74-496f-b687-55f81a323d1e" timestamp="2026-10-12T15:34:26.559Z" tests="3" failures="0" errors="0" time="0.561">
+    <testcase name="HTTP 201" time="0.561" classname="RegisterOtherClient"/>
+    <testcase name="Correct role" time="0.561" classname="RegisterOtherClient"/>
+    <testcase name="Password excluded" time="0.561" classname="RegisterOtherClient"/>
+  </testsuite>
+  <testsuite name="Create gig" id="3bd8cd98-563e-4aa3-85c8-d848d9087c13" timestamp="2026-10-12T15:34:26.559Z" tests="2" failures="0" errors="0" time="0.072">
+    <testcase name="HTTP 201" time="0.072" classname="CreateGig"/>
+    <testcase name="Trusted price saved" time="0.072" classname="CreateGig"/>
+  </testsuite>
+  <testsuite name="Create secondGig" id="fb8fb029-864e-48c6-bb62-fcf37400e47b" timestamp="2026-10-12T15:34:26.559Z" tests="2" failures="0" errors="0" time="0.068">
+    <testcase name="HTTP 201" time="0.068" classname="CreateSecondGig"/>
+    <testcase name="Trusted price saved" time="0.068" classname="CreateSecondGig"/>
+  </testsuite>
+  <testsuite name="Starting Freelancer income" id="4abed053-c085-4605-83e4-8e7e6bd741e2" timestamp="2026-10-12T15:34:26.559Z" tests="2" failures="0" errors="0" time="0.065">
+    <testcase name="HTTP 200" time="0.065" classname="StartingFreelancerIncome"/>
+    <testcase name="New account starts at zero" time="0.065" classname="StartingFreelancerIncome"/>
+  </testsuite>
+  <testsuite name="Client creates Booking and Transaction" id="383baedf-5ff9-49d0-b8f7-7122a9a9b4b3" timestamp="2026-10-12T15:34:26.559Z" tests="10" failures="0" errors="0" time="0.211">
+    <testcase name="HTTP 201" time="0.211" classname="ClientCreatesBookingAndTransaction"/>
+    <testcase name="Booking confirmed" time="0.211" classname="ClientCreatesBookingAndTransaction"/>
+    <testcase name="Transaction completed" time="0.211" classname="ClientCreatesBookingAndTransaction"/>
+    <testcase name="Transaction links to Booking" time="0.211" classname="ClientCreatesBookingAndTransaction"/>
+    <testcase name="Client assigned from JWT" time="0.211" classname="ClientCreatesBookingAndTransaction"/>
+    <testcase name="Freelancer assigned from Gig" time="0.211" classname="ClientCreatesBookingAndTransaction"/>
+    <testcase name="Booking uses saved price" time="0.211" classname="ClientCreatesBookingAndTransaction"/>
+    <testcase name="Transaction uses saved price" time="0.211" classname="ClientCreatesBookingAndTransaction"/>
+    <testcase name="Transaction identities match" time="0.211" classname="ClientCreatesBookingAndTransaction"/>
+    <testcase name="First operation is new" time="0.211" classname="ClientCreatesBookingAndTransaction"/>
+  </testsuite>
+  <testsuite name="Same-key retry reuses original records" id="f061b520-ea7a-47fb-8b2f-3a1011910f86" timestamp="2026-10-12T15:34:26.559Z" tests="4" failures="0" errors="0" time="0.121">
+    <testcase name="HTTP 200" time="0.121" classname="SameKeyRetryReusesOriginalRecords"/>
+    <testcase name="Retry marked reused" time="0.121" classname="SameKeyRetryReusesOriginalRecords"/>
+    <testcase name="Same Booking ID" time="0.121" classname="SameKeyRetryReusesOriginalRecords"/>
+    <testcase name="Same Transaction ID" time="0.121" classname="SameKeyRetryReusesOriginalRecords"/>
+  </testsuite>
+  <testsuite name="Same key with different Gig rejected" id="293f54f8-f245-4e68-8929-52887f974d45" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.096">
+    <testcase name="HTTP 409" time="0.096" classname="SameKeyWithDifferentGigRejected"/>
+  </testsuite>
+  <testsuite name="Client sees exactly one Booking" id="f95ffd53-0c6a-4aa8-8bcc-86d8215093b9" timestamp="2026-10-12T15:34:26.559Z" tests="3" failures="0" errors="0" time="0.099">
+    <testcase name="HTTP 200" time="0.099" classname="ClientSeesExactlyOneBooking"/>
+    <testcase name="Only one Booking after retry" time="0.099" classname="ClientSeesExactlyOneBooking"/>
+    <testcase name="Correct Booking returned" time="0.099" classname="ClientSeesExactlyOneBooking"/>
+  </testsuite>
+  <testsuite name="Freelancer receives matching Booking" id="51f753e9-b8d8-4c85-b66e-adc15ea1153a" timestamp="2026-10-12T15:34:26.559Z" tests="4" failures="0" errors="0" time="0.101">
+    <testcase name="HTTP 200" time="0.101" classname="FreelancerReceivesMatchingBooking"/>
+    <testcase name="One received Booking" time="0.101" classname="FreelancerReceivesMatchingBooking"/>
+    <testcase name="Correct Client populated" time="0.101" classname="FreelancerReceivesMatchingBooking"/>
+    <testcase name="Correct Gig populated" time="0.101" classname="FreelancerReceivesMatchingBooking"/>
+  </testsuite>
+  <testsuite name="Client views Booking" id="95defb4c-0b3a-4321-801f-406b440ce77b" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.116">
+    <testcase name="HTTP 200" time="0.116" classname="ClientViewsBooking"/>
+  </testsuite>
+  <testsuite name="Owning Freelancer views Booking" id="fc204bb5-861c-4baa-9c40-2d8482183f90" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.091">
+    <testcase name="HTTP 200" time="0.091" classname="OwningFreelancerViewsBooking"/>
+  </testsuite>
+  <testsuite name="Unrelated Client views Booking" id="5479be32-6391-459b-8fa7-9a91984d6196" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.108">
+    <testcase name="HTTP 404" time="0.108" classname="UnrelatedClientViewsBooking"/>
+  </testsuite>
+  <testsuite name="Unrelated Freelancer views Booking" id="1ff9ff2d-8446-464a-8294-77b1b0f8b6ea" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.113">
+    <testcase name="HTTP 404" time="0.113" classname="UnrelatedFreelancerViewsBooking"/>
+  </testsuite>
+  <testsuite name="Other Client history stays empty" id="698ca462-db32-42fb-88a5-4197f689b812" timestamp="2026-10-12T15:34:26.559Z" tests="2" failures="0" errors="0" time="0.064">
+    <testcase name="HTTP 200" time="0.064" classname="OtherClientHistoryStaysEmpty"/>
+    <testcase name="Other Client sees no Bookings" time="0.064" classname="OtherClientHistoryStaysEmpty"/>
+  </testsuite>
+  <testsuite name="Other Freelancer received list stays empty" id="0344b440-771a-4812-88cb-0234beca3f86" timestamp="2026-10-12T15:34:26.559Z" tests="2" failures="0" errors="0" time="0.068">
+    <testcase name="HTTP 200" time="0.068" classname="OtherFreelancerReceivedListStaysEmpty"/>
+    <testcase name="Other Freelancer sees no Bookings" time="0.068" classname="OtherFreelancerReceivedListStaysEmpty"/>
+  </testsuite>
+  <testsuite name="Freelancer cannot create Booking" id="b277112c-d0d0-42c8-bbcc-44f7d2c4921f" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.037">
+    <testcase name="HTTP 403" time="0.037" classname="FreelancerCannotCreateBooking"/>
+  </testsuite>
+  <testsuite name="Client cannot access Freelancer Booking list" id="37c377e1-700b-4b31-acac-79cbe95fee51" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.037">
+    <testcase name="HTTP 403" time="0.037" classname="ClientCannotAccessFreelancerBookingList"/>
+  </testsuite>
+  <testsuite name="Freelancer cannot access Client Booking list" id="956c558a-5043-4695-b52f-32b158de02eb" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.037">
+    <testcase name="HTTP 403" time="0.037" classname="FreelancerCannotAccessClientBookingList"/>
+  </testsuite>
+  <testsuite name="Submitted price rejected" id="ad76254b-6447-443d-9e40-0325dd170a38" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.062">
+    <testcase name="HTTP 400" time="0.062" classname="SubmittedPriceRejected"/>
+  </testsuite>
+  <testsuite name="Submitted identity rejected" id="a6859618-a75a-477e-8d83-086b2ceaa202" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.037">
+    <testcase name="HTTP 400" time="0.037" classname="SubmittedIdentityRejected"/>
+  </testsuite>
+  <testsuite name="Injection object rejected" id="5102a13b-3087-4527-8a3e-36952dc3196b" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.035">
+    <testcase name="HTTP 400" time="0.035" classname="InjectionObjectRejected"/>
+  </testsuite>
+  <testsuite name="Missing idempotency key rejected" id="1d8e7903-d36a-4763-89a8-5f4347cd64cc" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.069">
+    <testcase name="HTTP 400" time="0.069" classname="MissingIdempotencyKeyRejected"/>
+  </testsuite>
+  <testsuite name="Nonexistent Gig rejected" id="7e7f5610-17b4-400e-921d-9e45fc9f5264" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.173">
+    <testcase name="HTTP 404" time="0.173" classname="NonexistentGigRejected"/>
+  </testsuite>
+  <testsuite name="Missing JWT cannot view Booking" id="10627151-8840-4659-aa05-4604ecca4288" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="HTTP 401" time="0.006" classname="MissingJwtCannotViewBooking"/>
+  </testsuite>
+  <testsuite name="Invalid JWT cannot view Booking" id="5be2f995-38e5-4ade-b9ee-79129220e6e8" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.050">
+    <testcase name="HTTP 401" time="0.050" classname="InvalidJwtCannotViewBooking"/>
+  </testsuite>
+  <testsuite name="Expired JWT cannot view Booking" id="1baff0f7-f4f1-46ba-bbb5-17402557a1bb" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.053">
+    <testcase name="HTTP 401" time="0.053" classname="ExpiredJwtCannotViewBooking"/>
+  </testsuite>
+  <testsuite name="Invalid Booking ID rejected" id="dbfa1410-45b5-4ccc-9aaa-e868fd45ec5d" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.082">
+    <testcase name="HTTP 400" time="0.082" classname="InvalidBookingIdRejected"/>
+  </testsuite>
+  <testsuite name="Nonexistent Booking returns 404" id="a2dc936a-9ba3-43d5-822c-bcacad647c8b" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.062">
+    <testcase name="HTTP 404" time="0.062" classname="NonexistentBookingReturns404"/>
+  </testsuite>
+  <testsuite name="Exactly one matching Transaction" id="8a2f409d-3b08-421d-b56c-ac4ffe96bdef" timestamp="2026-10-12T15:34:26.559Z" tests="5" failures="0" errors="0" time="0.131">
+    <testcase name="HTTP 200" time="0.131" classname="ExactlyOneMatchingTransaction"/>
+    <testcase name="Retry created no duplicate Transaction" time="0.131" classname="ExactlyOneMatchingTransaction"/>
+    <testcase name="Correct Transaction ID" time="0.131" classname="ExactlyOneMatchingTransaction"/>
+    <testcase name="Populated Booking matches" time="0.131" classname="ExactlyOneMatchingTransaction"/>
+    <testcase name="Saved amount unchanged" time="0.131" classname="ExactlyOneMatchingTransaction"/>
+  </testsuite>
+  <testsuite name="Income increases exactly once" id="6da8e71b-988c-4fe2-a701-aef645936d84" timestamp="2026-10-12T15:34:26.559Z" tests="4" failures="0" errors="0" time="0.066">
+    <testcase name="HTTP 200" time="0.066" classname="IncomeIncreasesExactlyOnce"/>
+    <testcase name="Currency is ZAR" time="0.066" classname="IncomeIncreasesExactlyOnce"/>
+    <testcase name="Income increased by 125.50" time="0.066" classname="IncomeIncreasesExactlyOnce"/>
+    <testcase name="Count increased by one" time="0.066" classname="IncomeIncreasesExactlyOnce"/>
+  </testsuite>
+  <testsuite name="Other Freelancer income stays zero" id="d2322c00-9168-4ca6-a380-67fed72696cd" timestamp="2026-10-12T15:34:26.559Z" tests="3" failures="0" errors="0" time="0.066">
+    <testcase name="HTTP 200" time="0.066" classname="OtherFreelancerIncomeStaysZero"/>
+    <testcase name="Income isolated" time="0.066" classname="OtherFreelancerIncomeStaysZero"/>
+    <testcase name="Count isolated" time="0.066" classname="OtherFreelancerIncomeStaysZero"/>
+  </testsuite>
+  <testsuite name="Other Freelancer transactions stay empty" id="a4aa5f1a-e23c-4c2e-bdd4-2ec95b1873d5" timestamp="2026-10-12T15:34:26.559Z" tests="2" failures="0" errors="0" time="0.067">
+    <testcase name="HTTP 200" time="0.067" classname="OtherFreelancerTransactionsStayEmpty"/>
+    <testcase name="Transactions isolated" time="0.067" classname="OtherFreelancerTransactionsStayEmpty"/>
+  </testsuite>
+  <testsuite name="Client cannot access income" id="eede27e0-e724-41e1-ac81-9b089aae7d43" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.039">
+    <testcase name="HTTP 403" time="0.039" classname="ClientCannotAccessIncome"/>
+  </testsuite>
+  <testsuite name="Client cannot access Transaction history" id="15f315ee-0b96-4616-8eba-9ad2a9fc0d50" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.089">
+    <testcase name="HTTP 403" time="0.089" classname="ClientCannotAccessTransactionHistory"/>
+  </testsuite>
+  <testsuite name="Transaction history requires JWT" id="167569db-22f3-46a4-b21a-1d8311b83a76" timestamp="2026-10-12T15:34:26.559Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 401" time="0.007" classname="TransactionHistoryRequiresJwt"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="HustleHub Part 2 - Admin Access Tests" tests="41" time="3.582">
+  <testsuite name="Existing Admin login" id="5254ddab-5f84-4e64-94d8-38a63ad7a0f3" timestamp="2026-10-12T18:32:36.424Z" tests="2" failures="0" errors="0" time="0.643">
+    <testcase name="HTTP 200" time="0.643" classname="ExistingAdminLogin"/>
+    <testcase name="Admin role verified" time="0.643" classname="ExistingAdminLogin"/>
+  </testsuite>
+  <testsuite name="Register test client" id="1c484508-8488-4870-aa29-dbbc07b6cb5f" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.678">
+    <testcase name="HTTP 201" time="0.678" classname="RegisterTestClient"/>
+  </testsuite>
+  <testsuite name="Register test freelancer" id="e754a139-1fbe-441b-96b6-3f68cb315c21" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.605">
+    <testcase name="HTTP 201" time="0.605" classname="RegisterTestFreelancer"/>
+  </testsuite>
+  <testsuite name="Admin accesses me" id="b4517e07-7f19-4585-9126-17968e6e9fcc" timestamp="2026-10-12T18:32:36.424Z" tests="3" failures="0" errors="0" time="0.107">
+    <testcase name="HTTP 200" time="0.107" classname="AdminAccessesMe"/>
+    <testcase name="Password fields excluded" time="0.107" classname="AdminAccessesMe"/>
+    <testcase name="Safe Admin profile" time="0.107" classname="AdminAccessesMe"/>
+  </testsuite>
+  <testsuite name="Client blocked from me" id="33406a93-dd0b-4eb9-bb10-4123fe8f43d2" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.054">
+    <testcase name="HTTP 403" time="0.054" classname="ClientBlockedFromMe"/>
+  </testsuite>
+  <testsuite name="Freelancer blocked from me" id="34c353e9-8082-49ac-bd71-fb0af51f3b41" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.057">
+    <testcase name="HTTP 403" time="0.057" classname="FreelancerBlockedFromMe"/>
+  </testsuite>
+  <testsuite name="Missing JWT blocked from me" id="b13ec80c-ec9d-4d0e-a17f-29885a631a64" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="HTTP 401" time="0.005" classname="MissingJwtBlockedFromMe"/>
+  </testsuite>
+  <testsuite name="Invalid JWT blocked from me" id="ff130ac6-c5cf-4fbd-bc69-7bf5c55ed52a" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="HTTP 401" time="0.009" classname="InvalidJwtBlockedFromMe"/>
+  </testsuite>
+  <testsuite name="Expired JWT blocked from me" id="cf4fd2c0-82b5-4435-a062-9b9d66b42e32" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="HTTP 401" time="0.008" classname="ExpiredJwtBlockedFromMe"/>
+  </testsuite>
+  <testsuite name="Admin accesses overview" id="eb310d1b-fcac-43c2-a9e2-c8a2db0bca72" timestamp="2026-10-12T18:32:36.424Z" tests="3" failures="0" errors="0" time="0.104">
+    <testcase name="HTTP 200" time="0.104" classname="AdminAccessesOverview"/>
+    <testcase name="Password fields excluded" time="0.104" classname="AdminAccessesOverview"/>
+    <testcase name="Overview returned" time="0.104" classname="AdminAccessesOverview"/>
+  </testsuite>
+  <testsuite name="Client blocked from overview" id="e87bccf9-9e23-4cc9-92a2-68fea0ccb03d" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.053">
+    <testcase name="HTTP 403" time="0.053" classname="ClientBlockedFromOverview"/>
+  </testsuite>
+  <testsuite name="Freelancer blocked from overview" id="62bd1eec-5bc9-4530-a3bb-6846c2f90032" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.054">
+    <testcase name="HTTP 403" time="0.054" classname="FreelancerBlockedFromOverview"/>
+  </testsuite>
+  <testsuite name="Missing JWT blocked from overview" id="b5abb386-4032-45bb-bea7-a3f69709ba62" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="HTTP 401" time="0.005" classname="MissingJwtBlockedFromOverview"/>
+  </testsuite>
+  <testsuite name="Invalid JWT blocked from overview" id="2667a8a5-b679-43a4-941e-d533d2c65891" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 401" time="0.007" classname="InvalidJwtBlockedFromOverview"/>
+  </testsuite>
+  <testsuite name="Expired JWT blocked from overview" id="bd97d93c-0416-4285-b2bd-4accf5734ff5" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="HTTP 401" time="0.008" classname="ExpiredJwtBlockedFromOverview"/>
+  </testsuite>
+  <testsuite name="Admin accesses users" id="fafc7cd1-bcd4-4d56-93cc-cdc86c71c0f0" timestamp="2026-10-12T18:32:36.424Z" tests="4" failures="0" errors="0" time="0.102">
+    <testcase name="HTTP 200" time="0.102" classname="AdminAccessesUsers"/>
+    <testcase name="Password fields excluded" time="0.102" classname="AdminAccessesUsers"/>
+    <testcase name="List returned" time="0.102" classname="AdminAccessesUsers"/>
+    <testcase name="Pagination returned" time="0.102" classname="AdminAccessesUsers"/>
+  </testsuite>
+  <testsuite name="Client blocked from users" id="57814ce8-c176-409b-b9d1-155a46885ef0" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.055">
+    <testcase name="HTTP 403" time="0.055" classname="ClientBlockedFromUsers"/>
+  </testsuite>
+  <testsuite name="Freelancer blocked from users" id="fc452556-af56-4d2b-b40a-8dd630a68083" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.053">
+    <testcase name="HTTP 403" time="0.053" classname="FreelancerBlockedFromUsers"/>
+  </testsuite>
+  <testsuite name="Missing JWT blocked from users" id="d45fed72-58d1-4ca6-8374-338e11f72b4d" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="HTTP 401" time="0.005" classname="MissingJwtBlockedFromUsers"/>
+  </testsuite>
+  <testsuite name="Invalid JWT blocked from users" id="c5ab2bc4-b5fe-48f7-935a-faaf855c7717" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="HTTP 401" time="0.005" classname="InvalidJwtBlockedFromUsers"/>
+  </testsuite>
+  <testsuite name="Expired JWT blocked from users" id="b3ad6330-3b2b-47a5-a39b-5239a509f567" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="HTTP 401" time="0.006" classname="ExpiredJwtBlockedFromUsers"/>
+  </testsuite>
+  <testsuite name="Admin accesses gigs" id="323ecf4a-7e9f-4493-b49c-a3de7a0b4387" timestamp="2026-10-12T18:32:36.424Z" tests="4" failures="0" errors="0" time="0.148">
+    <testcase name="HTTP 200" time="0.148" classname="AdminAccessesGigs"/>
+    <testcase name="Password fields excluded" time="0.148" classname="AdminAccessesGigs"/>
+    <testcase name="List returned" time="0.148" classname="AdminAccessesGigs"/>
+    <testcase name="Pagination returned" time="0.148" classname="AdminAccessesGigs"/>
+  </testsuite>
+  <testsuite name="Client blocked from gigs" id="b76c2950-c397-4917-bd99-9c06f7c2c2da" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.054">
+    <testcase name="HTTP 403" time="0.054" classname="ClientBlockedFromGigs"/>
+  </testsuite>
+  <testsuite name="Freelancer blocked from gigs" id="6e12f310-a302-4995-abe5-bc155f236c8c" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.053">
+    <testcase name="HTTP 403" time="0.053" classname="FreelancerBlockedFromGigs"/>
+  </testsuite>
+  <testsuite name="Missing JWT blocked from gigs" id="affcebf2-d45b-42c4-9b2a-5a8aeb3cf916" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 401" time="0.007" classname="MissingJwtBlockedFromGigs"/>
+  </testsuite>
+  <testsuite name="Invalid JWT blocked from gigs" id="6998559d-1085-43ee-802e-13c1a9977a25" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="HTTP 401" time="0.006" classname="InvalidJwtBlockedFromGigs"/>
+  </testsuite>
+  <testsuite name="Expired JWT blocked from gigs" id="fdec1921-e1db-47f0-a3a0-20a0850969ac" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 401" time="0.007" classname="ExpiredJwtBlockedFromGigs"/>
+  </testsuite>
+  <testsuite name="Admin accesses bookings" id="046690cc-809c-48f5-9eb0-2fcce686d1f8" timestamp="2026-10-12T18:32:36.424Z" tests="4" failures="0" errors="0" time="0.152">
+    <testcase name="HTTP 200" time="0.152" classname="AdminAccessesBookings"/>
+    <testcase name="Password fields excluded" time="0.152" classname="AdminAccessesBookings"/>
+    <testcase name="List returned" time="0.152" classname="AdminAccessesBookings"/>
+    <testcase name="Pagination returned" time="0.152" classname="AdminAccessesBookings"/>
+  </testsuite>
+  <testsuite name="Client blocked from bookings" id="f9ffa816-9ffd-41ed-ae15-05a27677c71d" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.055">
+    <testcase name="HTTP 403" time="0.055" classname="ClientBlockedFromBookings"/>
+  </testsuite>
+  <testsuite name="Freelancer blocked from bookings" id="af7b5904-3270-45d5-b69a-21324086ba73" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.054">
+    <testcase name="HTTP 403" time="0.054" classname="FreelancerBlockedFromBookings"/>
+  </testsuite>
+  <testsuite name="Missing JWT blocked from bookings" id="0fe99845-28cc-4dc1-ae45-2dd85a1a4e5b" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 401" time="0.007" classname="MissingJwtBlockedFromBookings"/>
+  </testsuite>
+  <testsuite name="Invalid JWT blocked from bookings" id="d5e3fb72-1483-48ad-99e2-79566ddbd96c" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="HTTP 401" time="0.008" classname="InvalidJwtBlockedFromBookings"/>
+  </testsuite>
+  <testsuite name="Expired JWT blocked from bookings" id="fb4dbd56-5f5e-477d-ac3f-de18e68c1cde" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 401" time="0.007" classname="ExpiredJwtBlockedFromBookings"/>
+  </testsuite>
+  <testsuite name="Admin accesses transactions" id="ed9955c6-89f3-443d-a18d-d8167cc9a42c" timestamp="2026-10-12T18:32:36.424Z" tests="4" failures="0" errors="0" time="0.147">
+    <testcase name="HTTP 200" time="0.147" classname="AdminAccessesTransactions"/>
+    <testcase name="Password fields excluded" time="0.147" classname="AdminAccessesTransactions"/>
+    <testcase name="List returned" time="0.147" classname="AdminAccessesTransactions"/>
+    <testcase name="Pagination returned" time="0.147" classname="AdminAccessesTransactions"/>
+  </testsuite>
+  <testsuite name="Client blocked from transactions" id="4a31f4e5-35f3-4804-a345-51fb02cb4bce" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.057">
+    <testcase name="HTTP 403" time="0.057" classname="ClientBlockedFromTransactions"/>
+  </testsuite>
+  <testsuite name="Freelancer blocked from transactions" id="11fd45c5-d81d-4fde-8faa-ac9a4ab50dc2" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.054">
+    <testcase name="HTTP 403" time="0.054" classname="FreelancerBlockedFromTransactions"/>
+  </testsuite>
+  <testsuite name="Missing JWT blocked from transactions" id="8e8758b3-8b54-4f3b-8d34-58b9ae52939a" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 401" time="0.007" classname="MissingJwtBlockedFromTransactions"/>
+  </testsuite>
+  <testsuite name="Invalid JWT blocked from transactions" id="387a9053-be83-4c0b-8772-d08868803bbe" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="HTTP 401" time="0.006" classname="InvalidJwtBlockedFromTransactions"/>
+  </testsuite>
+  <testsuite name="Expired JWT blocked from transactions" id="fc335200-d98e-4b3e-b0fb-69860744f79b" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="HTTP 401" time="0.009" classname="ExpiredJwtBlockedFromTransactions"/>
+  </testsuite>
+  <testsuite name="Admin user list limit capped" id="c82122ec-bc56-4a46-94ef-b3d7938469e7" timestamp="2026-10-12T18:32:36.424Z" tests="4" failures="0" errors="0" time="0.112">
+    <testcase name="HTTP 200" time="0.112" classname="AdminUserListLimitCapped"/>
+    <testcase name="Page clamped to one" time="0.112" classname="AdminUserListLimitCapped"/>
+    <testcase name="Limit capped at fifty" time="0.112" classname="AdminUserListLimitCapped"/>
+    <testcase name="At most fifty users" time="0.112" classname="AdminUserListLimitCapped"/>
+  </testsuite>
+  <testsuite name="Public Admin registration rejected" id="f9b43361-83dc-46f6-ad67-f4e0fe393361" timestamp="2026-10-12T18:32:36.424Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="HTTP 400" time="0.009" classname="PublicAdminRegistrationRejected"/>
+  </testsuite>
+</testsuites>

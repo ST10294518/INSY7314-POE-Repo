@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="HustleHub Part 2 - Member 1 Authentication and Gigs" tests="47" time="5.071">
+  <testsuite name="Authentication / API health and initialise test accounts" id="598d8d84-6545-4cd0-ad86-d5ad66af183e" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.132">
+    <testcase name="HTTP 200" time="0.132" classname="AuthenticationApiHealthAndInitialiseTestAccounts"/>
+    <testcase name="Health response" time="0.132" classname="AuthenticationApiHealthAndInitialiseTestAccounts"/>
+  </testsuite>
+  <testsuite name="Authentication / Register Gig owner" id="e7b44b63-5957-4118-905b-5a0ce224818c" timestamp="2026-10-12T12:39:50.014Z" tests="5" failures="0" errors="0" time="0.680">
+    <testcase name="HTTP 201" time="0.680" classname="AuthenticationRegisterGigOwner"/>
+    <testcase name="Correct account role" time="0.680" classname="AuthenticationRegisterGigOwner"/>
+    <testcase name="MongoDB user ID returned" time="0.680" classname="AuthenticationRegisterGigOwner"/>
+    <testcase name="Password fields excluded" time="0.680" classname="AuthenticationRegisterGigOwner"/>
+    <testcase name="JWT returned" time="0.680" classname="AuthenticationRegisterGigOwner"/>
+  </testsuite>
+  <testsuite name="Authentication / Register second Freelancer" id="fbf84efd-4079-4b30-b081-27b89d42b160" timestamp="2026-10-12T12:39:50.014Z" tests="5" failures="0" errors="0" time="0.703">
+    <testcase name="HTTP 201" time="0.703" classname="AuthenticationRegisterSecondFreelancer"/>
+    <testcase name="Correct account role" time="0.703" classname="AuthenticationRegisterSecondFreelancer"/>
+    <testcase name="MongoDB user ID returned" time="0.703" classname="AuthenticationRegisterSecondFreelancer"/>
+    <testcase name="Password fields excluded" time="0.703" classname="AuthenticationRegisterSecondFreelancer"/>
+    <testcase name="JWT returned" time="0.703" classname="AuthenticationRegisterSecondFreelancer"/>
+  </testsuite>
+  <testsuite name="Authentication / Register Client" id="e1db8369-6534-4d5e-9ef6-19c9f294562f" timestamp="2026-10-12T12:39:50.014Z" tests="5" failures="0" errors="0" time="0.562">
+    <testcase name="HTTP 201" time="0.562" classname="AuthenticationRegisterClient"/>
+    <testcase name="Correct account role" time="0.562" classname="AuthenticationRegisterClient"/>
+    <testcase name="MongoDB user ID returned" time="0.562" classname="AuthenticationRegisterClient"/>
+    <testcase name="Password fields excluded" time="0.562" classname="AuthenticationRegisterClient"/>
+    <testcase name="JWT returned" time="0.562" classname="AuthenticationRegisterClient"/>
+  </testsuite>
+  <testsuite name="Authentication / Login Gig owner" id="6d9eb75c-2ddb-4a75-8b0b-ccfe0139c85f" timestamp="2026-10-12T12:39:50.014Z" tests="3" failures="0" errors="0" time="0.524">
+    <testcase name="HTTP 200" time="0.524" classname="AuthenticationLoginGigOwner"/>
+    <testcase name="Same registered account" time="0.524" classname="AuthenticationLoginGigOwner"/>
+    <testcase name="Password hash excluded" time="0.524" classname="AuthenticationLoginGigOwner"/>
+  </testsuite>
+  <testsuite name="Authentication / Authenticated profile" id="1e44aef5-a37c-48fa-8e7e-46f6c9b5a1d6" timestamp="2026-10-12T12:39:50.014Z" tests="3" failures="0" errors="0" time="0.037">
+    <testcase name="HTTP 200" time="0.037" classname="AuthenticationAuthenticatedProfile"/>
+    <testcase name="Correct profile" time="0.037" classname="AuthenticationAuthenticatedProfile"/>
+    <testcase name="Profile excludes password hash" time="0.037" classname="AuthenticationAuthenticatedProfile"/>
+  </testsuite>
+  <testsuite name="Authentication / Duplicate registration rejected" id="b4adfb25-4a2b-4434-859e-e65b33205256" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.046">
+    <testcase name="HTTP 409" time="0.046" classname="AuthenticationDuplicateRegistrationRejected"/>
+  </testsuite>
+  <testsuite name="Authentication / Incorrect password rejected" id="987ff468-459c-4538-b5e2-5e9c2a7d6402" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.529">
+    <testcase name="HTTP 401" time="0.529" classname="AuthenticationIncorrectPasswordRejected"/>
+    <testcase name="Generic login error" time="0.529" classname="AuthenticationIncorrectPasswordRejected"/>
+  </testsuite>
+  <testsuite name="Authentication / Profile without JWT rejected" id="19cf0063-a650-4672-9846-5376c2f79b18" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="HTTP 401" time="0.006" classname="AuthenticationProfileWithoutJwtRejected"/>
+  </testsuite>
+  <testsuite name="Authentication / Profile with invalid JWT rejected" id="49488b77-18a1-46e4-81da-93010fe50c53" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="HTTP 401" time="0.005" classname="AuthenticationProfileWithInvalidJwtRejected"/>
+  </testsuite>
+  <testsuite name="Authentication / Public Admin registration rejected" id="dfcd76c8-e0ee-46ca-a17c-612192feb033" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 400" time="0.007" classname="AuthenticationPublicAdminRegistrationRejected"/>
+  </testsuite>
+  <testsuite name="Authentication / Email injection object rejected" id="ca44a220-e575-4246-b5aa-3f4e28f60ff7" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="HTTP 400" time="0.006" classname="AuthenticationEmailInjectionObjectRejected"/>
+    <testcase name="Validation error response" time="0.006" classname="AuthenticationEmailInjectionObjectRejected"/>
+  </testsuite>
+  <testsuite name="Authentication / Expired JWT profile rejected" id="a9b6e59f-0306-4792-8cfe-6c13d63fd3f5" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="Expired JWT returns 401" time="0.005" classname="AuthenticationExpiredJwtProfileRejected"/>
+    <testcase name="Safe expired-token response" time="0.005" classname="AuthenticationExpiredJwtProfileRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Freelancer creates Gig" id="50196b06-d019-4047-b04b-f155061ca079" timestamp="2026-10-12T12:39:50.014Z" tests="5" failures="0" errors="0" time="0.094">
+    <testcase name="HTTP 201" time="0.094" classname="GigManagementFreelancerCreatesGig"/>
+    <testcase name="Owner assigned from JWT" time="0.094" classname="GigManagementFreelancerCreatesGig"/>
+    <testcase name="Correct saved price" time="0.094" classname="GigManagementFreelancerCreatesGig"/>
+    <testcase name="Gig has MongoDB ID" time="0.094" classname="GigManagementFreelancerCreatesGig"/>
+    <testcase name="Creation timestamp exists" time="0.094" classname="GigManagementFreelancerCreatesGig"/>
+  </testsuite>
+  <testsuite name="Gig Management / Public Gig browsing" id="d0317264-7570-446a-9b3d-557e73985f08" timestamp="2026-10-12T12:39:50.014Z" tests="5" failures="0" errors="0" time="0.077">
+    <testcase name="HTTP 200" time="0.077" classname="GigManagementPublicGigBrowsing"/>
+    <testcase name="Gigs array returned" time="0.077" classname="GigManagementPublicGigBrowsing"/>
+    <testcase name="Created Gig appears publicly" time="0.077" classname="GigManagementPublicGigBrowsing"/>
+    <testcase name="Freelancer reference populated" time="0.077" classname="GigManagementPublicGigBrowsing"/>
+    <testcase name="Freelancer password hash excluded" time="0.077" classname="GigManagementPublicGigBrowsing"/>
+  </testsuite>
+  <testsuite name="Gig Management / Owner lists own gigs" id="9fab50fa-07fb-426f-a2f4-ce76183e0739" timestamp="2026-10-12T12:39:50.014Z" tests="3" failures="0" errors="0" time="0.065">
+    <testcase name="HTTP 200" time="0.065" classname="GigManagementOwnerListsOwnGigs"/>
+    <testcase name="Created Gig is in own list" time="0.065" classname="GigManagementOwnerListsOwnGigs"/>
+    <testcase name="Every Gig belongs to this account" time="0.065" classname="GigManagementOwnerListsOwnGigs"/>
+  </testsuite>
+  <testsuite name="Gig Management / Second Freelancer cannot see owner Gig in own list" id="ef531dfb-0305-457f-a2a4-fc0db13ad582" timestamp="2026-10-12T12:39:50.014Z" tests="3" failures="0" errors="0" time="0.093">
+    <testcase name="HTTP 200" time="0.093" classname="GigManagementSecondFreelancerCannotSeeOwnerGigInOwnList"/>
+    <testcase name="Other owner Gig excluded" time="0.093" classname="GigManagementSecondFreelancerCannotSeeOwnerGigInOwnList"/>
+    <testcase name="Own-list ownership respected" time="0.093" classname="GigManagementSecondFreelancerCannotSeeOwnerGigInOwnList"/>
+  </testsuite>
+  <testsuite name="Gig Management / Public Gig details" id="77e80ba0-a490-4ea5-a915-f011feff5605" timestamp="2026-10-12T12:39:50.014Z" tests="3" failures="0" errors="0" time="0.105">
+    <testcase name="HTTP 200" time="0.105" classname="GigManagementPublicGigDetails"/>
+    <testcase name="Correct Gig returned" time="0.105" classname="GigManagementPublicGigDetails"/>
+    <testcase name="Correct description" time="0.105" classname="GigManagementPublicGigDetails"/>
+  </testsuite>
+  <testsuite name="Gig Management / Owner updates Gig" id="e1db6439-e263-4c2a-ab4b-b841dbbb513d" timestamp="2026-10-12T12:39:50.014Z" tests="4" failures="0" errors="0" time="0.115">
+    <testcase name="HTTP 200" time="0.115" classname="GigManagementOwnerUpdatesGig"/>
+    <testcase name="Title updated" time="0.115" classname="GigManagementOwnerUpdatesGig"/>
+    <testcase name="Price updated" time="0.115" classname="GigManagementOwnerUpdatesGig"/>
+    <testcase name="Ownership unchanged" time="0.115" classname="GigManagementOwnerUpdatesGig"/>
+  </testsuite>
+  <testsuite name="Gig Management / Updated Gig persists" id="68708889-9dc4-4376-8bc6-3858aa9373f6" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.069">
+    <testcase name="HTTP 200" time="0.069" classname="GigManagementUpdatedGigPersists"/>
+    <testcase name="Saved update returned" time="0.069" classname="GigManagementUpdatedGigPersists"/>
+  </testsuite>
+  <testsuite name="Gig Management / Non-owner update rejected" id="eade5636-3fc5-4471-9a0e-88a5d4051e16" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.218">
+    <testcase name="HTTP 403" time="0.218" classname="GigManagementNonOwnerUpdateRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Non-owner deletion rejected" id="98d12bad-96e9-4732-ad01-51ace9e72be0" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.085">
+    <testcase name="HTTP 403" time="0.085" classname="GigManagementNonOwnerDeletionRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Client Gig creation rejected" id="f5fce9c3-66e8-439c-ab1e-2a8ae37752be" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.042">
+    <testcase name="HTTP 403" time="0.042" classname="GigManagementClientGigCreationRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Client own-Gig route rejected" id="75729f0b-4bf2-4715-acb3-d8ec88a38518" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.041">
+    <testcase name="HTTP 403" time="0.041" classname="GigManagementClientOwnGigRouteRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Client Gig update rejected" id="82727d05-50c9-4d01-b4d8-7ed8e3a39497" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.052">
+    <testcase name="HTTP 403" time="0.052" classname="GigManagementClientGigUpdateRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Client Gig deletion rejected" id="81dfe5c0-2e61-4e24-9b0b-3870cd852d3f" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.158">
+    <testcase name="HTTP 403" time="0.158" classname="GigManagementClientGigDeletionRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Creation without JWT rejected" id="4bedb21d-6af0-4359-ab07-7fe1a055936d" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="HTTP 401" time="0.005" classname="GigManagementCreationWithoutJwtRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Own-Gig list without JWT rejected" id="e380231a-8d1e-4aa4-92b8-a9043d0e0fcc" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="HTTP 401" time="0.005" classname="GigManagementOwnGigListWithoutJwtRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Update without JWT rejected" id="35f09c5c-5ad6-469b-847c-b390321b7100" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.004">
+    <testcase name="HTTP 401" time="0.004" classname="GigManagementUpdateWithoutJwtRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Deletion without JWT rejected" id="fc8d1608-4507-4e80-8080-c176bf38add0" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="HTTP 401" time="0.005" classname="GigManagementDeletionWithoutJwtRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Creation with invalid JWT rejected" id="7ab3168e-23d6-4de4-ad1a-2109a882e0c2" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="HTTP 401" time="0.005" classname="GigManagementCreationWithInvalidJwtRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Missing title rejected" id="4b108c3d-adb1-471d-9fb3-3369ba91fbae" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.038">
+    <testcase name="HTTP 400" time="0.038" classname="GigManagementMissingTitleRejected"/>
+    <testcase name="Validation failure returned" time="0.038" classname="GigManagementMissingTitleRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Negative price rejected" id="f634b31f-84a4-4e41-b2a5-ff20130b5d35" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.036">
+    <testcase name="HTTP 400" time="0.036" classname="GigManagementNegativePriceRejected"/>
+    <testcase name="Validation failure returned" time="0.036" classname="GigManagementNegativePriceRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Three decimal places rejected" id="58ca259a-9cc5-4ff6-af32-e96cf93642d4" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.034">
+    <testcase name="HTTP 400" time="0.034" classname="GigManagementThreeDecimalPlacesRejected"/>
+    <testcase name="Validation failure returned" time="0.034" classname="GigManagementThreeDecimalPlacesRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Title injection object rejected" id="8d3cc480-a868-432d-bc19-7cbcab5b4ac1" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.044">
+    <testcase name="HTTP 400" time="0.044" classname="GigManagementTitleInjectionObjectRejected"/>
+    <testcase name="Validation failure returned" time="0.044" classname="GigManagementTitleInjectionObjectRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Script description rejected" id="994c773d-3f99-4a37-b93c-4f52730b0ebe" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.038">
+    <testcase name="HTTP 400" time="0.038" classname="GigManagementScriptDescriptionRejected"/>
+    <testcase name="Validation failure returned" time="0.038" classname="GigManagementScriptDescriptionRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Submitted owner identity rejected" id="693a710f-873c-45bc-8086-a75a16b59883" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.046">
+    <testcase name="HTTP 400" time="0.046" classname="GigManagementSubmittedOwnerIdentityRejected"/>
+    <testcase name="Validation failure returned" time="0.046" classname="GigManagementSubmittedOwnerIdentityRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Owner reassignment rejected" id="78ce3c0c-92ba-4da9-8999-9cd9df51b6c8" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.038">
+    <testcase name="HTTP 400" time="0.038" classname="GigManagementOwnerReassignmentRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Invalid Gig ID rejected" id="9065877c-ce2c-4972-967a-b92807a73013" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.004">
+    <testcase name="HTTP 400" time="0.004" classname="GigManagementInvalidGigIdRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Missing Gig returns 404" id="b8692e95-94c2-4d1c-ab88-99ab1f8f0161" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.047">
+    <testcase name="HTTP 404" time="0.047" classname="GigManagementMissingGigReturns404"/>
+  </testsuite>
+  <testsuite name="Gig Management / Rejected changes left Gig intact" id="4e9416d3-d2d8-4bf4-9b2d-edf4d3a0ccae" timestamp="2026-10-12T12:39:50.014Z" tests="4" failures="0" errors="0" time="0.064">
+    <testcase name="HTTP 200" time="0.064" classname="GigManagementRejectedChangesLeftGigIntact"/>
+    <testcase name="Saved title unchanged" time="0.064" classname="GigManagementRejectedChangesLeftGigIntact"/>
+    <testcase name="Saved price unchanged" time="0.064" classname="GigManagementRejectedChangesLeftGigIntact"/>
+    <testcase name="Owner unchanged" time="0.064" classname="GigManagementRejectedChangesLeftGigIntact"/>
+  </testsuite>
+  <testsuite name="Gig Management / Expired JWT creation rejected" id="91e664c5-713f-471e-8b50-41273d851109" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="Expired JWT returns 401" time="0.005" classname="GigManagementExpiredJwtCreationRejected"/>
+    <testcase name="Safe expired-token response" time="0.005" classname="GigManagementExpiredJwtCreationRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Expired JWT own-Gig list rejected" id="fada5961-8d7a-4921-b4d9-2f20262cb41e" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="Expired JWT returns 401" time="0.004" classname="GigManagementExpiredJwtOwnGigListRejected"/>
+    <testcase name="Safe expired-token response" time="0.004" classname="GigManagementExpiredJwtOwnGigListRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Expired JWT update rejected" id="f4ac64c0-b655-4b1d-a5ff-a92b5331b0b9" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="Expired JWT returns 401" time="0.005" classname="GigManagementExpiredJwtUpdateRejected"/>
+    <testcase name="Safe expired-token response" time="0.005" classname="GigManagementExpiredJwtUpdateRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Expired JWT deletion rejected" id="e2b850ba-1a75-44f7-aea2-e6575bf86286" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="Expired JWT returns 401" time="0.004" classname="GigManagementExpiredJwtDeletionRejected"/>
+    <testcase name="Safe expired-token response" time="0.004" classname="GigManagementExpiredJwtDeletionRejected"/>
+  </testsuite>
+  <testsuite name="Gig Management / Owner deletes test Gig" id="d915279e-2a90-4799-8a57-12777169d0fe" timestamp="2026-10-12T12:39:50.014Z" tests="2" failures="0" errors="0" time="0.134">
+    <testcase name="HTTP 200" time="0.134" classname="GigManagementOwnerDeletesTestGig"/>
+    <testcase name="Deletion confirmed" time="0.134" classname="GigManagementOwnerDeletesTestGig"/>
+  </testsuite>
+  <testsuite name="Gig Management / Deleted Gig returns 404" id="809eb4f9-1544-4875-a174-6ce5e64feb67" timestamp="2026-10-12T12:39:50.014Z" tests="1" failures="0" errors="0" time="0.050">
+    <testcase name="HTTP 404" time="0.050" classname="GigManagementDeletedGigReturns404"/>
+  </testsuite>
+</testsuites>

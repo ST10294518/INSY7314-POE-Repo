@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+Vary: Origin
+Content-Type: text/html
+Cache-Control: no-cache
+Etag: W/"1d5-Tjd44DeoHm5E+LhjPNi/SCFPf4s"
+Content-Security-Policy: default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://localhost:5443; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+X-Frame-Options: DENY
+Date: Sun, 11 Oct 2026 21:34:20 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Content-Length: 469
