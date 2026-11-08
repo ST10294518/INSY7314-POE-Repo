@@ -438,3 +438,11 @@ Evidence:
 
 - [Admin API report](Evidence/Testing/admin-api-results.xml)
 - [Admin Newman summary](Evidence/Testing/admin-api-newman-run.png)
+
+
+### Part 3 dependency audit
+
+- **Backend:** `npm audit` reported zero vulnerabilities after updating `body-parser`, `ip-address`, and `qs`. All three backend test scripts passed after a clean install.
+- **Frontend production dependencies:** `npm --prefix client audit --omit=dev` reported zero vulnerabilities.
+- **Frontend development dependencies:** The full audit still reports four moderate entries linked to one [`minimatch` advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249) in the ESLint dependency chain. The installed version is `10.2.6`, and the advisory lists `11.0.1` as the first patched version. The latest ESLint and `@eslint/config-array` versions checked still require `minimatch` 10.x. ESLint 10 was retained because npm proposed a major-version downgrade. The advisory remains open and should be rechecked when the upstream dependency ranges change. Lint, all 41 frontend tests, the production build, and CI passed on commit `dd0e131`.
+- **Static source analysis:** The baseline Semgrep scan ran 70 rules on 51 files and reported zero findings in the scanned files. See the [Semgrep scan evidence](Evidence/Part3/StaticAnalysis/01-semgrep-baseline-passed.png).
