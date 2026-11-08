@@ -128,6 +128,50 @@ The frontend makes same-origin `/api` requests. Vite forwards them to
 - [Confirmed booking over HTTPS](Evidence/Part3/HTTPS/01-booking-over-https.png)
 - [Chrome HTTPS verification](Evidence/Part3/HTTPS/02-chrome-valid-https.png)
 
+## Run HustleHub+ with Docker Compose
+
+Start Docker Desktop and make sure the Linux engine is running. From the
+repository root, prepare the local `.env` and `certs/` directory using the setup
+steps above. Set `MONGODB_URI` to your test database URI and `JWT_SECRET` to a
+locally generated secret. Compose mounts `certs/cert.pem` and `certs/key.pem`
+read-only and sets the certificate paths inside the backend container.
+
+```powershell
+docker compose config --quiet
+docker compose up --build --detach --wait --wait-timeout 120
+docker compose ps
+```
+
+Open [HustleHub+](https://localhost:8443/). Nginx serves the React build on
+port `8443` and forwards `/api` requests to the Express backend on port `5443`
+inside the Compose network. It verifies the backend certificate using
+`certs/cert.pem`.
+
+To verify the React route and API over HTTPS, run:
+
+```powershell
+curl.exe --cacert ".\certs\cert.pem" --head https://localhost:8443/client/bookings
+curl.exe --cacert ".\certs\cert.pem" --fail https://localhost:8443/api/gigs
+```
+
+The booking route should return `200 OK` with HTML. The gigs endpoint should
+return `200 OK` with a JSON `gigs` array. To stop the local stack, run:
+
+```powershell
+docker compose down
+```
+
+GitHub Actions builds both application images and runs the stack with
+`compose.ci.yml`. That file adds a temporary MongoDB 7 container to work around
+the MongoDB 8 startup incompatibility observed on the CI runner. CI generates
+its own certificate and JWT secret, verifies both HTTPS routes, checks the
+JSON response, and removes the temporary stack and volumes.
+
+- [Local Compose and HTTPS checks](Evidence/Part3/Docker/01-local-compose-https.png)
+- [Passing GitHub Actions run #15](Evidence/Part3/Docker/02-ci-compose-passed.png)
+- [Containers running in CI](Evidence/Part3/Docker/03-ci-containers-running.png)
+- [HTTPS smoke checks in CI](Evidence/Part3/Docker/04-ci-https-checks-passed.png)
+
 ## Authentication and shared User model
 
 Authentication uses MongoDB rather than the previous JSON user store.
