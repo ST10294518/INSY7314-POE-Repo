@@ -530,3 +530,31 @@ over HTTPS. See the Docker Compose section above for local startup commands.
 - [CI failure evidence](Evidence/Part3/CI/04-frontend-test-failed.png)
 - [Skipped build evidence](Evidence/Part3/CI/05-frontend-build-skipped.png)
 - [Successful recovery evidence](Evidence/Part3/CI/06-ci-recovery-passed.png)
+
+## Part 3 security review
+
+| Threat | Implemented controls | Verification |
+| --- | --- | --- |
+| NoSQL injection and request tampering | The API allowlists request fields and validates input types. Authentication requires a string email. Booking accepts only a valid `gigId` and derives the client identity and price on the server. | The [booking integration report](Evidence/Testing/booking-integration-results.xml) records a rejected injection object. The [Part 3 backend CI log](Evidence/Part3/CI/01-backend-tests-passed.png) shows that malformed IDs and client-supplied prices and identities were rejected. |
+| Cross-site scripting (XSS) | Gig text validation rejects HTML delimiters and control characters. React renders gig data as text. The frontend preview and Nginx set a Content Security Policy that restricts scripts to the same origin and blocks inline scripts. Express applies Helmet security headers to API responses. | The [freelancer API report](Evidence/Testing/freelancer-api-results.xml) records a rejected script description. The [CSP evidence](Evidence/Security/client-csp-inline-script-blocked.png) shows an inline script being blocked. |
+| Authentication abuse and token misuse | Passwords are hashed with bcrypt. The API checks JWT signatures with HS256, checks token expiry, and loads the current user from MongoDB. Login rate limiting blocks repeated failed attempts. The browser and Compose checks verified HTTPS with a trusted local certificate. | The [admin API report](Evidence/Testing/admin-api-results.xml) records HTTP 401 for missing, invalid, and expired tokens. The [Part 3 backend CI log](Evidence/Part3/CI/01-backend-tests-passed.png) shows HTTP 429 after repeated failed login attempts. The [Chrome HTTPS evidence](Evidence/Part3/HTTPS/02-chrome-valid-https.png) shows a trusted TLS connection. |
+| Unauthorised access | Express checks roles and resource ownership on the server. Gig updates and deletions are restricted to the owner. Booking history, freelancer income, and transactions are scoped to the authenticated user's identity. | The [freelancer API report](Evidence/Testing/freelancer-api-results.xml) records rejected non-owner gig updates and deletions. The [booking integration report](Evidence/Testing/booking-integration-results.xml) records account isolation. The [admin API report](Evidence/Testing/admin-api-results.xml) records HTTP 403 for client and freelancer requests to admin endpoints. |
+
+The Newman reports above are retained integration evidence from Part 2.
+The Part 3 workflow runs the backend rate-limit and booking-validation
+scripts, frontend tests, Semgrep, and the HTTPS Compose smoke checks.
+
+### Remaining limitations and integration checks
+
+- On the Member 1 branch, logout clears the browser's in-memory session. An
+  issued JWT remains valid until expiry unless server-side revocation is
+  integrated. Verify logout and token replay against the merged build.
+- The rate-limit scripts verify thresholds on a standalone Express server.
+  Verify how requests from separate clients are counted behind Nginx on the
+  integrated stack.
+- The local HTTPS evidence uses a locally trusted development certificate.
+  The Semgrep scan covers the files and rules reported in its summary, and the
+  open `minimatch` development dependency advisory is recorded in the audit
+  section above.
+- After integration, run Member 2's security tests in CI and record the
+  observed results here.
