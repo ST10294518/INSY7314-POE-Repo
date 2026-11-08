@@ -499,3 +499,34 @@ Evidence:
 - **Frontend production dependencies:** `npm --prefix client audit --omit=dev` reported zero vulnerabilities.
 - **Frontend development dependencies:** The full audit still reports four moderate entries linked to one [`minimatch` advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249) in the ESLint dependency chain. The installed version is `10.2.6`, and the advisory lists `11.0.1` as the first patched version. The latest ESLint and `@eslint/config-array` versions checked still require `minimatch` 10.x. ESLint 10 was retained because npm proposed a major-version downgrade. The advisory remains open and should be rechecked when the upstream dependency ranges change. Lint, all 41 frontend tests, the production build, and CI passed on commit `dd0e131`.
 - **Static source analysis:** The baseline Semgrep scan ran 70 rules on 51 files and reported zero findings in the scanned files. See the [Semgrep scan evidence](Evidence/Part3/StaticAnalysis/01-semgrep-baseline-passed.png).
+
+## GitHub Actions CI
+
+The workflow in `.github/workflows/ci.yml` runs on pushes to
+`Feature/Member-1` and `Developer`, and on pull requests targeting `Developer`.
+It uses Node.js 24 and installs backend and frontend dependencies from their
+lockfiles before running the tests and building the React frontend.
+
+To reproduce the test-and-build job from the repository root:
+
+```powershell
+npm ci
+npm --prefix client ci
+npm test
+npm --prefix client test
+npm --prefix client run build
+```
+
+The backend test command runs authentication rate-limit, booking rate-limit,
+and booking validation checks. Semgrep scans the backend and frontend source
+in a separate job. Once the test-and-build and Semgrep jobs pass, the Compose
+job builds both application images and checks the React page and proxied API
+over HTTPS. See the Docker Compose section above for local startup commands.
+
+- [Run #1: initial tests and build passed](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42448870578)
+- [Run #2: deliberate test failure skipped the build](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42450301541)
+- [Run #3: tests and build recovered after the revert](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42450959998)
+- [Run #15: tests, Semgrep, and Compose smoke test passed](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42459982042)
+- [CI failure evidence](Evidence/Part3/CI/04-frontend-test-failed.png)
+- [Skipped build evidence](Evidence/Part3/CI/05-frontend-build-skipped.png)
+- [Successful recovery evidence](Evidence/Part3/CI/06-ci-recovery-passed.png)
