@@ -64,3 +64,56 @@ jobs:
               --config p/nodejs \
               --config p/expressjs \
               src client/src
+
+  compose-smoke:
+    name: Build and smoke-test Docker Compose stack
+    needs: [test-and-build, static-analysis]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Generate temporary CI configuration
+        run: |
+          umask 077
+          printf 'MONGODB_URI=mongodb://mongo:27017/hustlehub_ci\nJWT_SECRET=%s\n' \
+            "$(openssl rand -hex 32)" > .env
+          mkdir -p certs
+          openssl req -x509 -newkey rsa:2048 -sha256 -nodes \
+            -keyout certs/key.pem -out certs/cert.pem \
+            -days 1 -subj '/CN=localhost' \
+            -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
+          chmod 755 certs
+          chmod 644 certs/cert.pem
+          sudo chown 1000:1000 certs/key.pem
+          chmod_key_mode=600
+          sudo chmod "$chmod_key_mode" certs/key.pem
+
+      - name: Build and start the stack
+        run: |
+          docker compose -f compose.yml -f compose.ci.yml config --quiet
+          docker compose -f compose.yml -f compose.ci.yml up --build --detach --wait --wait-timeout 120
+          docker compose -f compose.yml -f compose.ci.yml ps
+
+      - name: Verify HTTPS frontend and API
+        run: |
+          curl --cacert certs/cert.pem --fail --silent --show-error \
+            --output /dev/null --write-out 'Booking page: HTTP %{http_code}\n' \
+            https://localhost:8443/client/bookings
+
+          curl --cacert certs/cert.pem --fail --silent --show-error \
+            --output "$RUNNER_TEMP/hustlehub-gigs.json" \
+            --write-out 'Gigs API via Nginx: HTTP %{http_code}\n' \
+            https://localhost:8443/api/gigs
+
+          python3 -c 'import json, sys; assert json.load(open(sys.argv[1]))["gigs"] == []' \
+            "$RUNNER_TEMP/hustlehub-gigs.json"
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose -f compose.yml -f compose.ci.yml logs --no-color --tail 80
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose -f compose.yml -f compose.ci.yml down --volumes
