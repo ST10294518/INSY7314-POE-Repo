@@ -1,4 +1,4 @@
-﻿const Gig = require('../models/Gig');
+const Gig = require('../models/Gig');
 
 function gigInput(body) {
   return {
@@ -27,7 +27,7 @@ async function createGig(req, res, next) {
 
 async function getGigs(req, res, next) {
   try {
-    const gigs = await Gig.find()
+    const gigs = await Gig.find({ isDeleted: { $ne: true } })
       .populate('freelancer', 'email')
       .sort({ createdAt: -1 });
 
@@ -39,7 +39,7 @@ async function getGigs(req, res, next) {
 
 async function getMyGigs(req, res, next) {
   try {
-    const gigs = await Gig.find({ freelancer: req.user._id })
+    const gigs = await Gig.find({ freelancer: req.user._id, isDeleted: { $ne: true } })
       .sort({ createdAt: -1 });
 
     return res.status(200).json({ gigs });
@@ -53,7 +53,7 @@ async function getGig(req, res, next) {
     const gig = await Gig.findById(req.params.id)
       .populate('freelancer', 'email');
 
-    if (!gig) {
+    if (!gig || gig.isDeleted) {
       return res.status(404).json({ message: 'Gig not found.' });
     }
 
@@ -67,7 +67,7 @@ async function updateGig(req, res, next) {
   try {
     const gig = await Gig.findById(req.params.id);
 
-    if (!gig) {
+    if (!gig || gig.isDeleted) {
       return res.status(404).json({ message: 'Gig not found.' });
     }
 
@@ -93,7 +93,7 @@ async function deleteGig(req, res, next) {
   try {
     const gig = await Gig.findById(req.params.id);
 
-    if (!gig) {
+    if (!gig || gig.isDeleted) {
       return res.status(404).json({ message: 'Gig not found.' });
     }
 
@@ -103,12 +103,13 @@ async function deleteGig(req, res, next) {
       });
     }
 
-    const result = await Gig.deleteOne({
-      _id: gig._id,
-      freelancer: req.user._id,
-    });
+    const result = await Gig.updateOne(
+      { _id: gig._id, freelancer: req.user._id, isDeleted: { $ne: true } },
+      { $set: { isDeleted: true, deletedAt: new Date() } },
+      { runValidators: true }
+    );
 
-    if (result.deletedCount !== 1) {
+    if (result.modifiedCount !== 1) {
       return res.status(404).json({ message: 'Gig not found.' });
     }
 

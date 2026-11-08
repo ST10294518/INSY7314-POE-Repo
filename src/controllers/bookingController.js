@@ -107,7 +107,7 @@ async function createBooking(req, res, next) {
     await session.withTransaction(async () => {
       const gig = await Gig.findById(gigId).session(session);
 
-      if (!gig) {
+      if (!gig || gig.isDeleted) {
         const error = new Error('Gig not found.');
         error.statusCode = 404;
         throw error;
