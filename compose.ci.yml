@@ -1,0 +1,14 @@
+services:
+  mongo:
+    image: mongo:7.0
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand({ ping: 1 }).ok === 1 ? quit(0) : quit(1)"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+      start_period: 10s
+
+  backend:
+    depends_on:
+      mongo:
+        condition: service_healthy

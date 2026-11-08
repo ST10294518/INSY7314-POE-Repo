@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { Agent } from 'node:https'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
@@ -15,30 +17,41 @@ const previewCsp = [
   "frame-ancestors 'none'",
 ].join('; ')
 
-const apiProxy = {
-  '/api': {
-    target: 'https://localhost:5443',
-    changeOrigin: true,
-    secure: false,
-  },
-}
+export default defineConfig(({ command, mode }) => {
+  const localServerOptions = {}
 
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 5173,
-    proxy: apiProxy,
-  },
-  preview: {
-    host: 'localhost',
-    port: 4173,
-    strictPort: true,
-    proxy: apiProxy,
-    headers: {
-      'Content-Security-Policy': previewCsp,
-      'X-Content-Type-Options': 'nosniff',
-      'Referrer-Policy': 'no-referrer',
-      'X-Frame-Options': 'DENY',
+  if (command === 'serve' && mode !== 'test') {
+    const key = readFileSync(new URL('../certs/key.pem', import.meta.url))
+    const cert = readFileSync(new URL('../certs/cert.pem', import.meta.url))
+
+    localServerOptions.https = { key, cert }
+    localServerOptions.proxy = {
+      '/api': {
+        target: 'https://localhost:5443',
+        changeOrigin: true,
+        secure: true,
+        agent: new Agent({ ca: cert }),
+      },
+    }
+  }
+
+  return {
+    plugins: [react()],
+    server: {
+      port: 5173,
+      ...localServerOptions,
     },
-  },
+    preview: {
+      host: 'localhost',
+      port: 4173,
+      strictPort: true,
+      ...localServerOptions,
+      headers: {
+        'Content-Security-Policy': previewCsp,
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'no-referrer',
+        'X-Frame-Options': 'DENY',
+      },
+    },
+  }
 })

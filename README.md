@@ -104,7 +104,7 @@ Frontend development terminal:
 npm --prefix client run dev
 ```
 
-Vite uses port 5173. Use the URL printed in the terminal.
+Vite development runs at https://localhost:5173. Use the URL printed in the terminal.
 
 To build and inspect the frontend with preview CSP:
 
@@ -113,11 +113,64 @@ npm --prefix client run build
 npm --prefix client run preview
 ```
 
-Preview runs at http://localhost:4173.
+Preview runs at https://localhost:4173.
 
-The frontend calls relative /api paths. Vite proxies those requests to
-https://localhost:5443. Its secure:false proxy setting accommodates the
-local self-signed backend certificate; it is a local development setting.
+Vite development and preview use `certs/cert.pem` and `certs/key.pem`.
+Follow the certificate generation steps above before starting either server.
+On Windows, add the public localhost certificate you generated to your
+current-user Trusted Root Certification Authorities store, then reopen Chrome.
+Keep the private key and `.env` out of Git.
+
+The frontend makes same-origin `/api` requests. Vite forwards them to
+`https://localhost:5443` and verifies the backend certificate against
+`certs/cert.pem`. Frontend builds and tests can run without these local files.
+
+- [Confirmed booking over HTTPS](Evidence/Part3/HTTPS/01-booking-over-https.png)
+- [Chrome HTTPS verification](Evidence/Part3/HTTPS/02-chrome-valid-https.png)
+
+## Run HustleHub+ with Docker Compose
+
+Start Docker Desktop and make sure the Linux engine is running. From the
+repository root, prepare the local `.env` and `certs/` directory using the setup
+steps above. Set `MONGODB_URI` to your test database URI and `JWT_SECRET` to a
+locally generated secret. Compose mounts `certs/cert.pem` and `certs/key.pem`
+read-only and sets the certificate paths inside the backend container.
+
+```powershell
+docker compose config --quiet
+docker compose up --build --detach --wait --wait-timeout 120
+docker compose ps
+```
+
+Open [HustleHub+](https://localhost:8443/). Nginx serves the React build on
+port `8443` and forwards `/api` requests to the Express backend on port `5443`
+inside the Compose network. It verifies the backend certificate using
+`certs/cert.pem`.
+
+To verify the React route and API over HTTPS, run:
+
+```powershell
+curl.exe --cacert ".\certs\cert.pem" --head https://localhost:8443/client/bookings
+curl.exe --cacert ".\certs\cert.pem" --fail https://localhost:8443/api/gigs
+```
+
+The booking route should return `200 OK` with HTML. The gigs endpoint should
+return `200 OK` with a JSON `gigs` array. To stop the local stack, run:
+
+```powershell
+docker compose down
+```
+
+GitHub Actions builds both application images and runs the stack with
+`compose.ci.yml`. That file adds a temporary MongoDB 7 container to work around
+the MongoDB 8 startup incompatibility observed on the CI runner. CI generates
+its own certificate and JWT secret, verifies both HTTPS routes, checks the
+JSON response, and removes the temporary stack and volumes.
+
+- [Local Compose and HTTPS checks](Evidence/Part3/Docker/01-local-compose-https.png)
+- [Passing GitHub Actions run #15](Evidence/Part3/Docker/02-ci-compose-passed.png)
+- [Containers running in CI](Evidence/Part3/Docker/03-ci-containers-running.png)
+- [HTTPS smoke checks in CI](Evidence/Part3/Docker/04-ci-https-checks-passed.png)
 
 ## Authentication and shared User model
 
@@ -438,3 +491,70 @@ Evidence:
 
 - [Admin API report](Evidence/Testing/admin-api-results.xml)
 - [Admin Newman summary](Evidence/Testing/admin-api-newman-run.png)
+
+
+### Part 3 dependency audit
+
+- **Backend:** `npm audit` reported zero vulnerabilities after updating `body-parser`, `ip-address`, and `qs`. All three backend test scripts passed after a clean install.
+- **Frontend production dependencies:** `npm --prefix client audit --omit=dev` reported zero vulnerabilities.
+- **Frontend development dependencies:** The full audit still reports four moderate entries linked to one [`minimatch` advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249) in the ESLint dependency chain. The installed version is `10.2.6`, and the advisory lists `11.0.1` as the first patched version. The latest ESLint and `@eslint/config-array` versions checked still require `minimatch` 10.x. ESLint 10 was retained because npm proposed a major-version downgrade. The advisory remains open and should be rechecked when the upstream dependency ranges change. Lint, all 41 frontend tests, the production build, and CI passed on commit `dd0e131`.
+- **Static source analysis:** The baseline Semgrep scan ran 70 rules on 51 files and reported zero findings in the scanned files. See the [Semgrep scan evidence](Evidence/Part3/StaticAnalysis/01-semgrep-baseline-passed.png).
+
+## GitHub Actions CI
+
+The workflow in `.github/workflows/ci.yml` runs on pushes to
+`Feature/Member-1` and `Developer`, and on pull requests targeting `Developer`.
+It uses Node.js 24 and installs backend and frontend dependencies from their
+lockfiles before running the tests and building the React frontend.
+
+To reproduce the test-and-build job from the repository root:
+
+```powershell
+npm ci
+npm --prefix client ci
+npm test
+npm --prefix client test
+npm --prefix client run build
+```
+
+The backend test command runs authentication rate-limit, booking rate-limit,
+and booking validation checks. Semgrep scans the backend and frontend source
+in a separate job. Once the test-and-build and Semgrep jobs pass, the Compose
+job builds both application images and checks the React page and proxied API
+over HTTPS. See the Docker Compose section above for local startup commands.
+
+- [Run #1: initial tests and build passed](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42448870578)
+- [Run #2: deliberate test failure skipped the build](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42450301541)
+- [Run #3: tests and build recovered after the revert](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42450959998)
+- [Run #15: tests, Semgrep, and Compose smoke test passed](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42459982042)
+- [CI failure evidence](Evidence/Part3/CI/04-frontend-test-failed.png)
+- [Skipped build evidence](Evidence/Part3/CI/05-frontend-build-skipped.png)
+- [Successful recovery evidence](Evidence/Part3/CI/06-ci-recovery-passed.png)
+
+## Part 3 security review
+
+| Threat | Implemented controls | Verification |
+| --- | --- | --- |
+| NoSQL injection and request tampering | The API allowlists request fields and validates input types. Authentication requires a string email. Booking accepts only a valid `gigId` and derives the client identity and price on the server. | The [booking integration report](Evidence/Testing/booking-integration-results.xml) records a rejected injection object. The [Part 3 backend CI log](Evidence/Part3/CI/01-backend-tests-passed.png) shows that malformed IDs and client-supplied prices and identities were rejected. |
+| Cross-site scripting (XSS) | Gig text validation rejects HTML delimiters and control characters. React renders gig data as text. The frontend preview and Nginx set a Content Security Policy that restricts scripts to the same origin and blocks inline scripts. Express applies Helmet security headers to API responses. | The [freelancer API report](Evidence/Testing/freelancer-api-results.xml) records a rejected script description. The [CSP evidence](Evidence/Security/client-csp-inline-script-blocked.png) shows an inline script being blocked. |
+| Authentication abuse and token misuse | Passwords are hashed with bcrypt. The API checks JWT signatures with HS256, checks token expiry, and loads the current user from MongoDB. Login rate limiting blocks repeated failed attempts. The browser and Compose checks verified HTTPS with a trusted local certificate. | The [admin API report](Evidence/Testing/admin-api-results.xml) records HTTP 401 for missing, invalid, and expired tokens. The [Part 3 backend CI log](Evidence/Part3/CI/01-backend-tests-passed.png) shows HTTP 429 after repeated failed login attempts. The [Chrome HTTPS evidence](Evidence/Part3/HTTPS/02-chrome-valid-https.png) shows a trusted TLS connection. |
+| Unauthorised access | Express checks roles and resource ownership on the server. Gig updates and deletions are restricted to the owner. Booking history, freelancer income, and transactions are scoped to the authenticated user's identity. | The [freelancer API report](Evidence/Testing/freelancer-api-results.xml) records rejected non-owner gig updates and deletions. The [booking integration report](Evidence/Testing/booking-integration-results.xml) records account isolation. The [admin API report](Evidence/Testing/admin-api-results.xml) records HTTP 403 for client and freelancer requests to admin endpoints. |
+
+The Newman reports above are retained integration evidence from Part 2.
+The Part 3 workflow runs the backend rate-limit and booking-validation
+scripts, frontend tests, Semgrep, and the HTTPS Compose smoke checks.
+
+### Remaining limitations and integration checks
+
+- On the Member 1 branch, logout clears the browser's in-memory session. An
+  issued JWT remains valid until expiry unless server-side revocation is
+  integrated. Verify logout and token replay against the merged build.
+- The rate-limit scripts verify thresholds on a standalone Express server.
+  Verify how requests from separate clients are counted behind Nginx on the
+  integrated stack.
+- The local HTTPS evidence uses a locally trusted development certificate.
+  The Semgrep scan covers the files and rules reported in its summary, and the
+  open `minimatch` development dependency advisory is recorded in the audit
+  section above.
+- After integration, run Member 2's security tests in CI and record the
+  observed results here.
