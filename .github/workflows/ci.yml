@@ -1,0 +1,46 @@
+name: HustleHub+ CI
+
+on:
+  push:
+    branches:
+      - Feature/Member-1
+      - Developer
+  pull_request:
+    branches:
+      - Developer
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    name: Test backend and frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: npm --prefix client ci
+
+      - name: Run backend tests
+        run: npm test
+
+      - name: Run frontend tests
+        run: npm --prefix client test
+
+      - name: Build frontend
+        run: npm --prefix client run build
