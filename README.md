@@ -104,7 +104,7 @@ Frontend development terminal:
 npm --prefix client run dev
 ```
 
-Vite uses port 5173. Use the URL printed in the terminal.
+Vite development runs at https://localhost:5173. Use the URL printed in the terminal.
 
 To build and inspect the frontend with preview CSP:
 
@@ -113,11 +113,20 @@ npm --prefix client run build
 npm --prefix client run preview
 ```
 
-Preview runs at http://localhost:4173.
+Preview runs at https://localhost:4173.
 
-The frontend calls relative /api paths. Vite proxies those requests to
-https://localhost:5443. Its secure:false proxy setting accommodates the
-local self-signed backend certificate; it is a local development setting.
+Vite development and preview use `certs/cert.pem` and `certs/key.pem`.
+Follow the certificate generation steps above before starting either server.
+On Windows, add the public localhost certificate you generated to your
+current-user Trusted Root Certification Authorities store, then reopen Chrome.
+Keep the private key and `.env` out of Git.
+
+The frontend makes same-origin `/api` requests. Vite forwards them to
+`https://localhost:5443` and verifies the backend certificate against
+`certs/cert.pem`. Frontend builds and tests can run without these local files.
+
+- [Confirmed booking over HTTPS](Evidence/Part3/HTTPS/01-booking-over-https.png)
+- [Chrome HTTPS verification](Evidence/Part3/HTTPS/02-chrome-valid-https.png)
 
 ## Authentication and shared User model
 
