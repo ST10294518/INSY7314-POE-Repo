@@ -1,3 +1,4 @@
+import '../styles/tax-estimate.css'
 import { useEffect, useState } from 'react'
 import {
   getFreelancerIncome,
@@ -22,6 +23,38 @@ function formatDate(value) {
   return Number.isNaN(date.getTime())
     ? 'Date unavailable'
     : date.toLocaleString('en-ZA')
+}
+
+function FinancialEstimate({ income }) {
+  const valid = typeof income.estimatedTax === 'number' &&
+    Number.isFinite(income.estimatedTax) && income.estimatedTax >= 0 &&
+    typeof income.incomeAfterEstimatedTax === 'number' &&
+    Number.isFinite(income.incomeAfterEstimatedTax) && income.incomeAfterEstimatedTax >= 0 &&
+    typeof income.taxRate === 'number' && Number.isFinite(income.taxRate) &&
+    income.taxRate >= 0 && income.taxRate <= 1
+  if (!valid) return <p role="status">Tax estimate unavailable. Refresh after updating the API.</p>
+  const share = income.totalIncome > 0
+    ? Math.min(100, Math.max(0, income.estimatedTax / income.totalIncome * 100)) : 0
+  return (
+    <section aria-labelledby="tax-estimate-heading">
+      <h3 id="tax-estimate-heading">Income and estimated tax</h3>
+      <p>{income.period}</p>
+      <dl className="freelancer-income-summary">
+        <div><dt>Estimated tax reserve</dt><dd>{formatAmount(income.estimatedTax)}</dd></div>
+        <div><dt>Income after estimated tax</dt><dd>{formatAmount(income.incomeAfterEstimatedTax)}</dd></div>
+        <div><dt>Coursework estimate rate</dt><dd>{Math.round(income.taxRate * 100)}%</dd></div>
+      </dl>
+      <svg className="tax-allocation" viewBox="0 0 100 10" preserveAspectRatio="none"
+        role="img" aria-label={`Income allocation: ${formatAmount(income.estimatedTax)} estimated tax reserve and ${formatAmount(income.incomeAfterEstimatedTax)} remaining income`}>
+        <rect className="tax-allocation-empty" width="100" height="10" />
+        <rect className="tax-allocation-reserve" width={share} height="10" />
+        <rect className="tax-allocation-remaining" x={share}
+          width={income.totalIncome > 0 ? 100 - share : 0} height="10" />
+      </svg>
+      <p>Amber: estimated tax reserve. Green: remaining income.</p>
+      <p>{income.method}</p>
+    </section>
+  )
 }
 
 export default function FreelancerIncome({ token }) {
@@ -133,6 +166,8 @@ export default function FreelancerIncome({ token }) {
               <dd>{state.income.completedTransactions}</dd>
             </div>
           </dl>
+
+          <FinancialEstimate income={state.income} />
 
           <h3>Transaction history</h3>
 

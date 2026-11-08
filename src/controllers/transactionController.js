@@ -1,3 +1,4 @@
+const { estimateTax } = require('../utils/taxEstimate');
 
 const Transaction = require('../models/Transaction');
 
@@ -28,7 +29,7 @@ async function getIncome(req, res, next) {
 
     return res.status(200).json({
       currency: 'ZAR',
-      totalIncome: Math.round(summary.totalIncome * 100) / 100,
+      ...estimateTax(summary.totalIncome),
       completedTransactions: summary.completedTransactions,
     });
   } catch (err) {
