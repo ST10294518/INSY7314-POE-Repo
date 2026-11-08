@@ -44,3 +44,23 @@ jobs:
 
       - name: Build frontend
         run: npm --prefix client run build
+
+  static-analysis:
+    name: Scan backend and frontend with Semgrep
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Scan application source
+        run: |
+          docker run --rm \
+            --volume "$PWD:/src:ro" \
+            --workdir /src \
+            semgrep/semgrep:latest \
+            semgrep scan --error --strict --metrics=off \
+              --config p/javascript \
+              --config p/nodejs \
+              --config p/expressjs \
+              src client/src
