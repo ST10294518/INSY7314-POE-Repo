@@ -226,3 +226,7 @@ See the [file-by-file attribution/reference register](docs/PROJECT-ATTRIBUTIONS.
 The recording should show the full application flow and matching transaction references. Docker, Atlas and cloud logs can support the Part 3 explanation. The prepared script is separate from the repository archive; recording and publication are not established by this documentation update. Add the final accessible video URL here after upload, test access while signed out, and avoid including credentials.
 
 Before submitting: confirm current CI checks, review the dependency findings and source provenance, ensure evidence matches the demonstrated version, add the video link, and complete team sign-off. For Atlas DNS/TLS issues inspect network access, database permissions, DNS and container connectivity without disabling TLS verification. A temporary successful retry alone is not proof of a permanent network fix.
+
+## Demonstration video
+
+[Watch the complete application demonstration](https://youtu.be/m6wVqAQ_yYQ)
