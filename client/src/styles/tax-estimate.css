@@ -1,0 +1,4 @@
+.tax-allocation { display: block; width: 100%; height: 24px; border-radius: 6px; overflow: hidden; }
+.tax-allocation-empty { fill: #e5e7eb; }
+.tax-allocation-reserve { fill: #b45309; }
+.tax-allocation-remaining { fill: #047857; }

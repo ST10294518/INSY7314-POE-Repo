@@ -15,6 +15,7 @@ const {
 
 const {
   loginRateLimiter,
+  loginIpRateLimiter,
   registerRateLimiter,
 } = require('../middleware/authRateLimiter');
 
@@ -32,9 +33,10 @@ router.post(
 
 router.post(
   '/login',
-  loginRateLimiter,
+  loginIpRateLimiter,
   loginRules,
   handleValidationErrors,
+  loginRateLimiter,
   login
 );
 

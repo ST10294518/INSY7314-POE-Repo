@@ -558,3 +558,76 @@ scripts, frontend tests, Semgrep, and the HTTPS Compose smoke checks.
   section above.
 - After integration, run Member 2's security tests in CI and record the
   observed results here.
+
+
+<!-- MEMBER2-FEEDBACK-START -->
+## Consolidated API endpoint reference
+
+This table is derived from src/app.js and all five route modules. Public means no JWT is required. Protected endpoints require Authorization: Bearer <token>. Admin is not an automatic bypass for owner or freelancer-only checks. Unknown paths return 404. There is no independent payment-create endpoint: booking creation records the simulated payment atomically. Update this table when logout or other new endpoints are added.
+
+| Method | Endpoint | Access | Behaviour / restriction |
+| --- | --- | --- | --- |
+| GET | / | Public | API status |
+| POST | /api/auth/register | Public | Creates client/freelancer only; registration limit |
+| POST | /api/auth/login | Public | Network + account throttling |
+| GET | /api/auth/me | Any authenticated role | Own profile |
+| GET | /api/gigs | Public | Active gigs |
+| GET | /api/gigs/mine | Freelancer | Own active gigs |
+| GET | /api/gigs/:id | Public | Active gig details |
+| POST | /api/gigs | Freelancer | Create own gig |
+| PUT | /api/gigs/:id | Freelancer owner | Update own active gig |
+| DELETE | /api/gigs/:id | Freelancer owner | Soft-delete own gig |
+| POST | /api/bookings | Client | Own booking and simulated transaction; Idempotency-Key required |
+| GET | /api/bookings/mine | Client | Own booking history |
+| GET | /api/bookings/freelancer | Freelancer | Own received bookings |
+| GET | /api/bookings/:id | Authenticated booking participant | Controller requires matching client or freelancer ID; otherwise 404 |
+| GET | /api/transactions/income | Freelancer | Own income; includes estimate after tax package installation |
+| GET | /api/transactions/mine | Freelancer | Own transaction history |
+| GET | /api/admin/me | Admin | Verify admin access |
+| GET | /api/admin/overview | Admin | System overview |
+| GET | /api/admin/users | Admin | Paginated users |
+| GET | /api/admin/gigs | Admin | Paginated gigs |
+| GET | /api/admin/bookings | Admin | Paginated bookings |
+| GET | /api/admin/transactions | Admin | Paginated transactions |
+
+## Authentication rate limiting for real users
+
+This section supersedes earlier descriptions of an IP-only five-attempt login limit.
+
+An IP identifies a network connection, not necessarily an individual. Shared campus Wi-Fi, households, offices, mobile carriers and proxies can place many accounts behind one IP. The old five-failure IP bucket could block unrelated users.
+
+This revision layers two independent login budgets: 200 requests per resolved IP/subnet per 15 minutes and five unsuccessful requests per normalized account email per 15 minutes. The numbers are project defaults, not OWASP-prescribed thresholds; tune using observed traffic and support data. Email normalization runs before the account limiter, matching the login lookup. Existing and nonexistent account names follow the same limiter path. SHA-256 avoids raw email keys but is not encryption or protection against email guessing. Successful responses are removed from the account failure count; they do not reset preceding failures. Concurrent in-flight requests can temporarily consume the budget. IP limits count every login request, including malformed inputs. Registration retains a distinct 10-per-hour network cap; this still affects shared networks and needs capacity planning or a verified enrolment flow.
+
+The account bucket spans source IPs, so rotating IPs does not reset its budget. Different accounts sharing an IP have separate five-failure budgets but still share the larger network ceiling. Deliberate account throttling can deny access to a victim; recovery, MFA, risk-based challenges and monitoring are further mitigations. This does not replace the separately planned persistent account-lockout feature.
+
+### Proxy and deployment configuration
+
+Express defaults to trusting no proxy. The supplied Nginx proxy does not forward client IP headers, so Docker traffic may currently share the proxy IP. Before a real-user rollout, Member 1 must configure Nginx to overwrite X-Forwarded-For with the client address at a controlled public edge, then configure Express trust proxy with only the actual proxy addresses/subnets. Do not use trust proxy = true blindly. Do not trust a client-supplied header directly. If there are upstream load balancers, map the complete trusted chain and header rewriting policy first. Verify req.ip with two clients and a spoofed forwarding header. Do not log tokens in diagnostic endpoints.
+
+The default MemoryStore is process-local and resets on restart. Multiple replicas need an external shared store with independent key prefixes for each limiter. Persistent account protection, monitoring and store-failure policy must be designed and verified before claiming production readiness. Do not whitelist shared public IPs. Keep IPv6 subnet-aware handling via the library's default IP key generator and ipKeyGenerator fallback.
+
+### Evidence and tests
+
+Run npm test and node --test src/tests/authSharedIp.test.cjs. Capture account A's sixth failed request returning 429, account B still reaching authentication on the same IP, a successful login not consuming the failure allowance, and a rate-limit response with Retry-After. The isolated test uses mocked authentication, not real user credentials. Perform real-account, proxy and multi-instance checks separately. Add the new test command to CI in coordination with Member 1.
+
+## Code attribution and research sources
+
+Attribution is required for adapted code and external assistance, not just a general bibliography. Retain original copyright and licence notices. The group must verify and complete earlier code provenance; this section does not assert that unreviewed code is original.
+
+| Scope | Source / assistance | Use and remaining verification |
+| --- | --- | --- |
+| Soft deletion package: Gig model, gig/booking/admin controllers | OpenAI ChatGPT assistance in this project conversation, 8 November 2026 | Generated/adapted from supplied group code; existing tests passed locally per group terminal output; database history evidence still required |
+| Tax estimate utility, income controller/UI and supplied tests | OpenAI ChatGPT assistance in this project conversation, 8 November 2026 | Illustrative 20% coursework rule, not SARS law; installation and application evidence must be recorded |
+| Revised authRateLimiter.js, authRoutes.js and shared-IP tests | OpenAI ChatGPT assistance, 8 November 2026; express-rate-limit and OWASP documentation below | Project-specific implementation adapted from documented APIs and design guidance; group must run supplied tests |
+| Existing Part 1/2 code, assets and Member 1 infrastructure | Group members must identify actual authors, tutorials, repositories, AI assistance and licences | Provenance not established by this patch; replace this row with verified entries before submission |
+
+When code is copied or adapted, add a nearby comment naming the source and adaptation, and include author/organisation, title, URL, access date and licence where applicable in this register. Attribute images/icons separately. Package dependencies do not establish provenance for copied snippets. Review the institution's AI-use policy and disclose assistance accurately. Attribution does not guarantee reversal of the earlier mark deduction.
+
+### References (accessed 8 November 2026)
+
+- OWASP (n.d.) Authentication Cheat Sheet. https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html (login throttling and account-level counters).
+- OWASP (n.d.) Bot Management and Anti-Automation Cheat Sheet. https://cheatsheetseries.owasp.org/cheatsheets/Bot_Management_and_Anti-Automation_Cheat_Sheet.html (independent account and network budgets).
+- express-rate-limit contributors (n.d.) Configuration. https://express-rate-limit.mintlify.app/reference/configuration (key generation, successful-request handling and stores).
+- express-rate-limit contributors (n.d.) Error codes. https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ (proxy/IPv6 checks).
+- Express contributors (n.d.) Express behind proxies. https://expressjs.com/en/guide/behind-proxies/ (trusted proxy topology and forwarded headers).
+<!-- MEMBER2-FEEDBACK-END -->

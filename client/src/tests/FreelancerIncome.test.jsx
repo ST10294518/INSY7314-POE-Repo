@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import FreelancerIncome from '../components/FreelancerIncome'
@@ -28,6 +28,11 @@ function mockIncome(totalIncome = 1500.50, completedTransactions = 1) {
     currency: 'ZAR',
     totalIncome,
     completedTransactions,
+    estimatedTax: Math.round(totalIncome * 100 * 0.2) / 100,
+    incomeAfterEstimatedTax: (Math.round(totalIncome * 100) - Math.round(totalIncome * 100 * 0.2)) / 100,
+    taxRate: 0.2,
+    period: 'All recorded completed transactions (all time)',
+    method: 'Coursework flat-rate estimate: income x 20%. Not SARS tax payable.',
   })
 }
 
@@ -51,7 +56,7 @@ describe('Freelancer income and transactions', () => {
     expect(await screen.findByRole('heading', {
       name: 'No transactions yet',
     })).toBeInTheDocument()
-    expect(screen.getByText(/R\s*0[,.]00/)).toBeInTheDocument()
+    expect(screen.getAllByText(/R\s*0[,.]00/)).toHaveLength(3)
     expect(screen.getByText('0')).toBeInTheDocument()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
@@ -138,5 +143,40 @@ describe('Freelancer income and transactions', () => {
     expect(screen.getByText('Booking unavailable')).toBeInTheDocument()
     expect(screen.getByText(testTransaction._id)).toBeInTheDocument()
     expect(screen.getByText('completed')).toBeInTheDocument()
+  })
+})
+
+describe('Coursework tax estimate presentation', () => {
+  it('renders server tax values, period and allocation without inline styles', async () => {
+    mockIncome(1000, 1)
+    vi.mocked(getFreelancerTransactions).mockResolvedValue({ transactions: [] })
+    render(<FreelancerIncome token="test-token" />)
+    const heading = await screen.findByRole('heading', { name: 'Income and estimated tax' })
+    const section = heading.closest('section')
+    expect(within(section).getByText(/R\s*200[,.]00/)).toBeInTheDocument()
+    expect(within(section).getByText(/R\s*800[,.]00/)).toBeInTheDocument()
+    expect(within(section).getByText('20%')).toBeInTheDocument()
+    expect(within(section).getByText(/all time/)).toBeInTheDocument()
+    expect(within(section).getByText(/Not SARS/)).toBeInTheDocument()
+    const chart = within(section).getByRole('img')
+    expect(chart.querySelector('[style]')).toBeNull()
+    expect(chart.querySelector('.tax-allocation-reserve')).toHaveAttribute('width', '20')
+    expect(chart.querySelector('.tax-allocation-remaining')).toHaveAttribute('width', '80')
+  })
+  it('keeps an empty chart for zero income', async () => {
+    mockIncome(0, 0)
+    vi.mocked(getFreelancerTransactions).mockResolvedValue({ transactions: [] })
+    render(<FreelancerIncome token="test-token" />)
+    const chart = await screen.findByRole('img')
+    expect(chart.querySelector('.tax-allocation-reserve')).toHaveAttribute('width', '0')
+    expect(chart.querySelector('.tax-allocation-remaining')).toHaveAttribute('width', '0')
+  })
+  it('shows unavailable instead of inventing missing server tax values', async () => {
+    vi.mocked(getFreelancerIncome).mockResolvedValue({ currency: 'ZAR', totalIncome: 100, completedTransactions: 1 })
+    vi.mocked(getFreelancerTransactions).mockResolvedValue({ transactions: [] })
+    render(<FreelancerIncome token="test-token" />)
+    expect(await screen.findByText('Tax estimate unavailable. Refresh after updating the API.')).toBeInTheDocument()
+    expect(screen.queryByText('Estimated tax reserve')).not.toBeInTheDocument()
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 })

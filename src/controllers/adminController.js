@@ -38,7 +38,7 @@ async function getOverview(req, res, next) {
       User.countDocuments(),
       User.countDocuments({ role: 'client' }),
       User.countDocuments({ role: 'freelancer' }),
-      Gig.countDocuments(),
+      Gig.countDocuments({ isDeleted: { $ne: true } }),
       Booking.countDocuments(),
       Booking.countDocuments({ status: 'confirmed' }),
       Transaction.countDocuments({ status: 'completed' }),
@@ -99,14 +99,14 @@ async function getGigs(req, res, next) {
     const { page, limit, skip } = pagination(req);
 
     const [gigs, total] = await Promise.all([
-      Gig.find()
+      Gig.find({ isDeleted: { $ne: true } })
         .select('_id title category price freelancer createdAt')
         .populate('freelancer', 'email')
         .sort({ createdAt: -1, _id: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      Gig.countDocuments(),
+      Gig.countDocuments({ isDeleted: { $ne: true } }),
     ]);
 
     return res.status(200).json({

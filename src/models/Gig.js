@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const gigSchema = new mongoose.Schema(
   {
@@ -34,6 +34,8 @@ const gigSchema = new mongoose.Schema(
       maxlength: 80,
       default: '',
     },
+    isDeleted: { type: Boolean, default: false, index: true },
+    deletedAt: { type: Date, default: null },
     freelancer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
