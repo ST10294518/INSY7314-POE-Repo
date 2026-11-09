@@ -8,11 +8,14 @@ name: HustleHub+ CI
 on:
   push:
     branches:
+      - master
       - Feature/Member-1
       - Developer
   pull_request:
     branches:
+      - master
       - Developer
+  workflow_dispatch:
 
 permissions:
   contents: read
