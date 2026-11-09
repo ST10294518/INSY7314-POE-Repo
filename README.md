@@ -547,6 +547,8 @@ The Newman reports above are retained integration evidence from Part 2.
 The Part 3 workflow runs the backend rate-limit and booking-validation
 scripts, frontend tests, Semgrep, and the HTTPS Compose smoke checks.
 
+The local Docker Compose browser smoke test passed through Nginx HTTPS. A test client signed in and saw the new booking marked confirmed in My Bookings. After sign-out, reopening the protected bookings URL redirected to login. See the [confirmed booking screenshot](Evidence/Part3/HTTPS/03-compose-booking-confirmed.png).
+
 ### Remaining limitations and integration checks
 
 - Server-side logout revokes the presented token. CI verified that
