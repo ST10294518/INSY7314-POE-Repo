@@ -552,11 +552,13 @@ The local Docker Compose browser smoke test passed through Nginx HTTPS. A test c
 ### Remaining limitations and integration checks
 
 - Server-side logout revokes the presented token. CI verified that
-  revocation persists across a MongoDB reconnection. Browser verification
-  of logout and token replay on the merged Compose stack remains open.
-- The rate-limit scripts verify thresholds on a standalone Express server.
-  Verify how requests from separate clients are counted behind Nginx on the
-  integrated stack.
+  revocation persists across a MongoDB reconnection. In the local Compose
+  test through Nginx, the same token returned HTTP 200 from `/api/auth/me`
+  before browser logout and HTTP 401 afterward. [Token replay evidence](Evidence/Part3/Security/03-nginx-token-revocation-passed.png)
+- Verified per-IP registration rate limiting through Nginx using two
+  Docker clients with distinct IPs. Client A received ten HTTP 400
+  validation responses and HTTP 429 on request 11. Client B still
+  received HTTP 400 after Client A hit the limit. [Rate-limit evidence](Evidence/Part3/Security/04-nginx-per-ip-rate-limit-passed.png)
 - The local HTTPS evidence uses a locally trusted development certificate.
   The Semgrep scan covers the files and rules reported in its summary, and the
   open `minimatch` development dependency advisory is recorded in the audit
@@ -645,7 +647,7 @@ When code is copied or adapted, add a nearby comment naming the source and adapt
 <!-- MEMBER2-SECURITY-FEATURES -->
 ## Additional authentication security features
 
-Implemented persistent temporary account lockout and MongoDB-backed per-token revocation on logout. See [Security feature implementation, tests and limitations](docs/Member2-Security-Features.md). New endpoint: POST /api/auth/logout, available to any authenticated role. Lockout persists across API restarts; logout revokes only the presented token. CI runs the authentication security unit tests and the isolated MongoDB integration suite. See the post-merge results above. Manual browser verification remains open.
+Implemented persistent temporary account lockout and MongoDB-backed per-token revocation on logout. See [Security feature implementation, tests and limitations](docs/Member2-Security-Features.md). New endpoint: POST /api/auth/logout, available to any authenticated role. Lockout persists across API restarts; logout revokes only the presented token. CI runs the authentication security unit tests and the isolated MongoDB integration suite. See the post-merge results above. The local Compose browser smoke test and token replay check through Nginx also passed.
 
 
 <!-- MEMBER2-LOGGING-MONITORING -->
