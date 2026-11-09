@@ -31,9 +31,20 @@ No package dependencies, JWT secret, Docker files, proxy configuration or tax/de
 - npm --prefix client test
 - npm --prefix client run build
 
-The integration runner loads .env locally, prefers SECURITY_TEST_MONGODB_URI and otherwise uses MONGODB_URI as the server connection. Use a test deployment. It creates an isolated randomly named hustlehub_security_test_* database, never uses the URI's database name, and drops only that generated database afterwards. The account needs create/write/drop permissions for that temporary database. There are 11 nested MongoDB integration scenarios; report them as unverified if the test is skipped or cannot connect. Do not paste the connection string into chat. The integration test script skips without an explicit test URI; the runner supplies it locally. CI must use a test MongoDB service and include the new tests with Member 1.
+The integration runner loads `.env` locally. It prefers
+`SECURITY_TEST_MONGODB_URI` and falls back to `MONGODB_URI` for the connection.
+The suite explicitly selects `hhst_kairah_security` for setup and cleanup.
+Use a test deployment with permission to create collections and indexes,
+write test records, and drop that dedicated database after the suite runs.
 
-Packaging validation: 7 backend security unit tests, existing backend tests, 51 frontend tests and production build passed. A real MongoDB test was attempted but the container could not start the database process (environment restriction), so the 11 database scenarios remain unverified here. The tests cover persistent lockout, shared-IP independence, expiry/reset, concurrent failed attempts, per-token logout, reconnection, expired/missing-exp tokens and legacy documents. Run them in your environment before claiming the features fully verified.
+GitHub Actions run #33 verified all 11 MongoDB-backed security scenarios
+against a temporary MongoDB 7 container. Node reported 12 passes, including
+the parent test, with zero failures and zero skips. The scenarios covered
+persistent account lockout, concurrent failed login attempts, per-token
+logout, and revocation after reconnecting to MongoDB.
+
+- [GitHub Actions run #33](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42648142206)
+- [MongoDB security integration test log screenshot](../Evidence/Part3/Security/01-mongodb-security-integration-passed.png)
 
 ## Manual evidence
 

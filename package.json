@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node src/tests/testAuthRateLimiter.js && node src/tests/testBookingRateLimiter.js && node src/tests/testBookingValidation.js && node --test src/tests/authSharedIp.test.cjs src/tests/taxEstimate.test.cjs src/tests/taxIncomeController.test.cjs"
+    "test": "node src/tests/testAuthRateLimiter.js && node src/tests/testBookingRateLimiter.js && node src/tests/testBookingValidation.js && node --test src/tests/authSharedIp.test.cjs src/tests/taxEstimate.test.cjs src/tests/taxIncomeController.test.cjs src/tests/authSecurity.test.cjs src/tests/logging.test.cjs"
   },
   "keywords": [],
   "author": "",
