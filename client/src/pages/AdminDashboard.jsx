@@ -135,6 +135,8 @@ function RecordsTable({ section, records }) {
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
+  const [logoutError, setLogoutError] = useState('')
+  const [loggingOut, setLoggingOut] = useState(false)
   const { token, user, logout } = useAuth()
 
   const [section, setSection] = useState('overview')
@@ -185,9 +187,17 @@ export default function AdminDashboard() {
     setPage(1)
   }
 
-  function handleLogout() {
-    logout()
-    navigate('/login', { replace: true })
+  async function handleLogout() {
+    setLogoutError('')
+    setLoggingOut(true)
+    try {
+      await logout()
+      navigate('/login', { replace: true })
+    } catch {
+      setLogoutError('Logout could not be confirmed. Please retry while connected.')
+    } finally {
+      setLoggingOut(false)
+    }
   }
 
   const records =
@@ -232,10 +242,11 @@ export default function AdminDashboard() {
         <button
           className="admin-logout"
           type="button"
-          onClick={handleLogout}
+          onClick={handleLogout} disabled={loggingOut}
         >
           Log out
         </button>
+        {logoutError && <p role="alert">{logoutError}</p>}
       </aside>
 
       <div className="admin-main">

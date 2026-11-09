@@ -62,6 +62,9 @@ export const authApi = {
       body: JSON.stringify({ email, password, role }),
     }),
 
+  logout: (token) =>
+    apiRequest('/auth/logout', { method: 'POST', token }),
+
   me: (token) =>
     apiRequest('/auth/me', { token }),
 }

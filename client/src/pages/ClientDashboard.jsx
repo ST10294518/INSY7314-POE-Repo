@@ -13,6 +13,8 @@ const formatPrice = (price) =>
 export default function ClientDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [logoutError, setLogoutError] = useState('')
+  const [loggingOut, setLoggingOut] = useState(false)
 
   const [gigs, setGigs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -106,9 +108,17 @@ export default function ClientDashboard() {
     setReloadCount((previous) => previous + 1)
   }
 
-  function handleLogout() {
-    logout()
-    navigate('/login', { replace: true })
+  async function handleLogout() {
+    setLogoutError('')
+    setLoggingOut(true)
+    try {
+      await logout()
+      navigate('/login', { replace: true })
+    } catch {
+      setLogoutError('Logout could not be confirmed. Please retry while connected.')
+    } finally {
+      setLoggingOut(false)
+    }
   }
 
   return (
@@ -136,10 +146,11 @@ export default function ClientDashboard() {
           <button
             type="button"
             className="outline-button"
-            onClick={handleLogout}
+            onClick={handleLogout} disabled={loggingOut}
           >
             Log out
           </button>
+        {logoutError && <p role="alert">{logoutError}</p>}
         </nav>
       </header>
 

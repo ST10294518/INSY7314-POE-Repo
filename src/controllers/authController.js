@@ -1,8 +1,11 @@
-﻿const bcrypt = require('bcryptjs');
+const security = require('../services/authSecurity');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS, 10) || 12;
+// Perform a password hash comparison for unknown/locked accounts too.
+const DUMMY_HASH = bcrypt.hashSync('non-user-timing-comparison-value', SALT_ROUNDS);
 
 async function register(req, res, next) {
   try {
@@ -25,6 +28,7 @@ async function register(req, res, next) {
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await User.create({ email, passwordHash, role });
 
+    res.locals.auditActorId = String(user._id);
     return res.status(201).json({
       message: 'Registration successful.',
       user: user.toSafeUser(),
@@ -43,19 +47,36 @@ async function register(req, res, next) {
 async function login(req, res, next) {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email }).select('+passwordHash');
-
-    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
-      return res.status(401).json({
-        message: 'Invalid email or password.',
-      });
+    const user = await User.findOne({ email })
+      .select('+passwordHash +failedLoginAttempts +lastFailedLoginAt +lockUntil');
+    if (user) res.locals.auditActorId = String(user._id);
+    const locked = security.isLocked(user);
+    if (locked) res.locals.accountLocked = true;
+    const passwordMatches = await bcrypt.compare(
+      password, user && !locked ? user.passwordHash : DUMMY_HASH
+    );
+    if (!user || locked || !passwordMatches) {
+      if (user && !locked) await security.recordLoginFailure(user._id);
+      return res.status(401).json({ message: 'Invalid email or password.' });
     }
-
+    const authenticated = await security.completeSuccessfulLogin(user);
+    if (!authenticated) {
+      return res.status(401).json({ message: 'Invalid email or password.' });
+    }
     return res.status(200).json({
       message: 'Login successful.',
-      user: user.toSafeUser(),
-      token: generateToken(user),
+      user: authenticated.toSafeUser(),
+      token: generateToken(authenticated),
     });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function logout(req, res, next) {
+  try {
+    await security.revokeToken(req.auth);
+    return res.status(200).json({ message: 'Logged out successfully.' });
   } catch (err) {
     return next(err);
   }
@@ -65,4 +86,4 @@ function getProfile(req, res) {
   return res.status(200).json({ user: req.user.toSafeUser() });
 }
 
-module.exports = { register, login, getProfile };
+module.exports = { register, login, logout, getProfile };

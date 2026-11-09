@@ -1,4 +1,5 @@
-﻿const jwt = require('jsonwebtoken');
+const { randomUUID } = require('node:crypto');
+const jwt = require('jsonwebtoken');
 
 function generateToken(user) {
   const payload = {
@@ -9,6 +10,7 @@ function generateToken(user) {
 
   return jwt.sign(payload, process.env.JWT_SECRET, {
     algorithm: 'HS256',
+    jwtid: randomUUID(),
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
   });
 }

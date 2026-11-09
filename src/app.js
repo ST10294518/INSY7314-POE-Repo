@@ -1,7 +1,7 @@
 
 const express = require('express');
 const helmet = require('helmet');
-const morgan = require('morgan');
+const { requestLogger } = require('./middleware/requestLogger');
 
 const authRoutes = require('./routes/authRoutes');
 const gigRoutes = require('./routes/gigRoutes');
@@ -35,8 +35,8 @@ app.use(
   })
 );
 
+app.use(requestLogger);
 app.use(express.json({ limit: '10kb' }));
-app.use(morgan('dev'));
 
 app.get('/', (req, res) => {
   return res.status(200).json({

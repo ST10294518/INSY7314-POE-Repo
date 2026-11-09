@@ -571,6 +571,7 @@ This table is derived from src/app.js and all five route modules. Public means n
 | POST | /api/auth/register | Public | Creates client/freelancer only; registration limit |
 | POST | /api/auth/login | Public | Network + account throttling |
 | GET | /api/auth/me | Any authenticated role | Own profile |
+| POST | /api/auth/logout | Any authenticated role | Revoke the current token until expiry |
 | GET | /api/gigs | Public | Active gigs |
 | GET | /api/gigs/mine | Freelancer | Own active gigs |
 | GET | /api/gigs/:id | Public | Active gig details |
@@ -631,3 +632,15 @@ When code is copied or adapted, add a nearby comment naming the source and adapt
 - express-rate-limit contributors (n.d.) Error codes. https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ (proxy/IPv6 checks).
 - Express contributors (n.d.) Express behind proxies. https://expressjs.com/en/guide/behind-proxies/ (trusted proxy topology and forwarded headers).
 <!-- MEMBER2-FEEDBACK-END -->
+
+
+<!-- MEMBER2-SECURITY-FEATURES -->
+## Additional authentication security features
+
+Implemented persistent temporary account lockout and MongoDB-backed per-token revocation on logout. See [Security feature implementation, tests and limitations](docs/Member2-Security-Features.md). New endpoint: POST /api/auth/logout, available to any authenticated role. Lockout persists across API restarts; logout revokes only the presented token. Database integration and manual evidence must be verified before final submission. Add the new unit and isolated-database test commands to CI with Member 1.
+
+
+<!-- MEMBER2-LOGGING-MONITORING -->
+## Logging and monitoring
+
+The API emits structured JSON for authentication, bookings, committed simulated transactions, gig changes, logout, rate limiting and errors. Each request has a generated request ID. Secrets, request bodies, raw errors and query strings are excluded. Optional Better Stack HTTPS ingestion supports cloud search and monitoring. See [Logging implementation, cloud setup and evidence checklist](docs/Member2-Logging-Monitoring.md). Cloud connectivity and real-event delivery must be verified separately; pending Atlas connectivity still blocks database-dependent evidence. Logging uses bounded best-effort delivery and is not a guaranteed financial audit trail.
