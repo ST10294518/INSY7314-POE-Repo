@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
@@ -15,6 +15,9 @@ const userSchema = new mongoose.Schema(
       required: true,
       select: false,
     },
+    failedLoginAttempts: { type: Number, default: 0, select: false },
+    lastFailedLoginAt: { type: Date, default: null, select: false },
+    lockUntil: { type: Date, default: null, select: false },
     role: {
       type: String,
       enum: ['client', 'freelancer', 'admin'],

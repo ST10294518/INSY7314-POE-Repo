@@ -144,6 +144,11 @@ async function createBooking(req, res, next) {
       createdTransaction = transaction;
     });
 
+    res.locals.completedPayment = {
+      bookingId: String(createdBooking._id),
+      transactionId: String(createdTransaction._id),
+    };
+
     return res.status(201).json({
       message:
         'Booking and simulated payment completed successfully.',

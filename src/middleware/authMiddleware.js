@@ -1,4 +1,5 @@
-﻿const jwt = require('jsonwebtoken');
+const { digestToken, isRevoked } = require('../services/authSecurity');
+const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const User = require('../models/User');
 
@@ -24,12 +25,17 @@ async function protect(req, res, next) {
     !decoded ||
     typeof decoded !== 'object' ||
     typeof decoded.id !== 'string' ||
+    !Number.isSafeInteger(decoded.exp) || decoded.exp <= Math.floor(Date.now() / 1000) ||
     !mongoose.isObjectIdOrHexString(decoded.id)
   ) {
     return res.status(401).json({ message: 'Invalid or expired token.' });
   }
 
   try {
+    const tokenDigest = digestToken(token);
+    if (await isRevoked(tokenDigest)) {
+      return res.status(401).json({ message: 'Invalid or expired token.' });
+    }
     const user = await User.findById(decoded.id);
 
     if (!user) {
@@ -37,6 +43,7 @@ async function protect(req, res, next) {
     }
 
     req.user = user;
+    req.auth = { tokenDigest, expiresAt: new Date(decoded.exp * 1000) };
     return next();
   } catch (err) {
     return next(err);

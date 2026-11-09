@@ -12,6 +12,8 @@ import '../styles/freelancer.css'
 export default function FreelancerDashboard() {
   const { user, token, logout } = useAuth()
   const navigate = useNavigate()
+  const [logoutError, setLogoutError] = useState('')
+  const [loggingOut, setLoggingOut] = useState(false)
   const [reload, setReload] = useState(0)
   const [editingGigId, setEditingGigId] = useState(null)
   const [gigSuccess, setGigSuccess] = useState('')
@@ -86,9 +88,17 @@ export default function FreelancerDashboard() {
     refreshGigs()
   }
 
-  function handleLogout() {
-    logout()
-    navigate('/login', { replace: true })
+  async function handleLogout() {
+    setLogoutError('')
+    setLoggingOut(true)
+    try {
+      await logout()
+      navigate('/login', { replace: true })
+    } catch {
+      setLogoutError('Logout could not be confirmed. Please retry while connected.')
+    } finally {
+      setLoggingOut(false)
+    }
   }
 
   return (
@@ -97,9 +107,10 @@ export default function FreelancerDashboard() {
         <Link className="freelancer-brand" to="/freelancer">
           HustleHub<span>+</span>
         </Link>
-        <button type="button" onClick={handleLogout}>
+        <button type="button" onClick={handleLogout} disabled={loggingOut}>
           Log out
         </button>
+        {logoutError && <p role="alert">{logoutError}</p>}
       </header>
 
       <section className="freelancer-account" aria-labelledby="account-heading">

@@ -1,4 +1,5 @@
-﻿function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, next) {
+  res.locals.auditErrorType = ['ValidationError','CastError','SyntaxError','TypeError','MongoServerError','MongooseError'].includes(err.name) ? err.name : 'ApplicationError';
   if (res.headersSent) {
     return next(err);
   }
@@ -33,9 +34,7 @@
     });
   }
 
-  console.error(
-    `[${new Date().toISOString()}] Unhandled request error.`
-  );
+  // The request logger emits a sanitized application_error on response finish.
 
   return res.status(500).json({
     message: 'An unexpected error occurred.',

@@ -1,11 +1,12 @@
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { authApi, setUnauthorizedHandler } from '../services/api'
 import { AuthContext } from './AuthStateContext'
 
 const ALLOWED_ROLES = ['client', 'freelancer', 'admin']
 
 export function AuthProvider({ children }) {
+  const sessionToken = useRef(null)
   const [user, setUser] = useState(null)
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -14,6 +15,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     return setUnauthorizedHandler((rejectedToken) => {
       if (token && rejectedToken === token) {
+        sessionToken.current = null
         setUser(null)
         setToken(null)
         setSessionExpired(true)
@@ -35,6 +37,7 @@ export function AuthProvider({ children }) {
       throw new Error('Unable to verify account permissions.')
     }
 
+    sessionToken.current = result.token
     setToken(result.token)
     setUser(verified.user)
     setSessionExpired(false)
@@ -74,10 +77,23 @@ export function AuthProvider({ children }) {
     }
   }
 
-  function logout() {
-    setUser(null)
-    setToken(null)
-    setSessionExpired(false)
+  async function logout() {
+    const departingToken = sessionToken.current
+    if (departingToken) {
+      try {
+        await authApi.logout(departingToken)
+      } catch (error) {
+        // A rejected token is already unusable; other failures keep the session
+        // visible so the user can retry instead of assuming server revocation.
+        if (error.status !== 401) throw error
+      }
+    }
+    if (sessionToken.current === departingToken) {
+      sessionToken.current = null
+      setUser(null)
+      setToken(null)
+      setSessionExpired(false)
+    }
   }
 
   return (
