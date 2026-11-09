@@ -1,3 +1,7 @@
+// Documentation references added during final review (9 November 2026).
+// REACT: https://react.dev/reference/react
+// ROUTER: https://reactrouter.com/start/declarative/routing
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'

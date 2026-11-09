@@ -1,4 +1,7 @@
-﻿function requireFreelancer(req, res, next) {
+﻿// Documentation references added during final review (9 November 2026).
+// EXP: https://expressjs.com/en/5x/api/
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
+function requireFreelancer(req, res, next) {
   if (!req.user) {
     return res.status(401).json({ message: 'Authentication required.' });
   }

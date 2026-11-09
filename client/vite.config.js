@@ -1,3 +1,8 @@
+// Documentation references added during final review (9 November 2026).
+// VITE: https://vite.dev/config/server-options
+// HTTPS: https://nodejs.org/api/https.html
+// VITEST: https://vitest.dev/guide/
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 import { readFileSync } from 'node:fs'
 import { Agent } from 'node:https'
 import react from '@vitejs/plugin-react'

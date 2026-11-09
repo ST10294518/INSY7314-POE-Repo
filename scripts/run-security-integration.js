@@ -1,3 +1,6 @@
+// Documentation references added during final review (9 November 2026).
+// NODETEST: https://nodejs.org/api/test.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 // Uses a randomly named isolated database, never the database named in the URI.
 require('dotenv').config({ quiet: true });
 const { spawn } = require('node:child_process');

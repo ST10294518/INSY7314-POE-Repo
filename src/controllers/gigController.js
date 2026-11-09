@@ -1,3 +1,7 @@
+// Documentation references added during final review (9 November 2026).
+// EXP: https://expressjs.com/en/5x/api/
+// MONG: https://mongoosejs.com/docs/guide.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 const Gig = require('../models/Gig');
 
 function gigInput(body) {

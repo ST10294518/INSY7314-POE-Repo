@@ -1,3 +1,8 @@
+// Documentation references added during final review (9 November 2026).
+// LOG: https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html
+// CLOUD: https://betterstack.com/docs/logs/ingesting-data/http/logs/
+// CRYPTO: https://nodejs.org/api/crypto.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 require('dotenv').config({quiet:true});
 const {logger}=require('../src/services/logger');
 const {randomUUID}=require('node:crypto');

@@ -1,3 +1,7 @@
+// Documentation references added during final review (9 November 2026).
+// MONG: https://mongoosejs.com/docs/guide.html
+// BCRYPT: https://github.com/dcodeIO/bcrypt.js
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 
 require('dotenv').config();
 

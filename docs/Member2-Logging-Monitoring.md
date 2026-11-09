@@ -44,7 +44,7 @@ BETTER_STACK_INGESTING_HOST=replace_locally_with_source_ingesting_host
 The host may be the hostname or HTTPS origin supplied by Better Stack. Supported provider domains are betterstackdata.com, logtail.com and betterstack.com subdomains. The URL must use HTTPS without credentials, query, path or fragment. No default host/token is supplied. Invalid/incomplete configuration produces a local cloud_logging_configuration_invalid diagnostic and leaves local logging enabled.
 
 4. Run node scripts/test-cloud-logging.js. It emits a clearly labelled synthetic connectivity event and reports whether the cloud accepted it. Search the printed requestId in Live tail. It needs no database. This sends one test event to your configured cloud source; do not include credentials in screenshots.
-5. Restart the API after changing .env. Generate real login, booking and transaction events once Atlas connectivity is resolved. Search login_failed, booking_created and transaction_recorded; correlate by requestId and safe IDs.
+5. Restart the API after changing .env. Generate real login, booking and transaction events with a working database connection. Search login_failed, booking_created and transaction_recorded; correlate by requestId and safe IDs.
 6. Create saved views for application_error and auth_rate_limited/login_failed. Optionally configure a count-based alert with a threshold/window appropriate to the demonstration. Test and capture evidence; no alert is created automatically by this package.
 
 ## Delivery and operational limits
@@ -58,12 +58,12 @@ A cloud outage, full queue, restart or abrupt termination can lose pending cloud
 - Run node --test src/tests/logging.test.cjs.
 - Run npm test and node --test src/tests/authSecurity.test.cjs src/tests/authSharedIp.test.cjs src/tests/taxEstimate.test.cjs src/tests/taxIncomeController.test.cjs.
 - Run the cloud connectivity command; confirm the synthetic event in Live tail.
-- Resolve Atlas network access and rerun node scripts/run-security-integration.js (still outstanding).
+- MongoDB integration passed in the recorded local run and repository CI evidence. Re-run against a dedicated test database when database/security code changes; see Member2-Security-Features.md.
 - Generate and capture real login success/failure, a booking, its transaction and an error log. Keep tokens and secrets hidden.
 - Verify a booking retry does not produce a second transaction_recorded event.
 - Check the same events with the Docker Compose stack. Its existing backend env_file reads .env; coordinate container rebuild/recreation with Member 1.
 - Capture filtering by event/requestId, plus any configured alert test, under Evidence/Part3/Logging.
-- Add the logging test command to CI with Member 1. No package/workflow files are replaced here.
+- npm test now includes the logging and security unit tests, so the CI backend-test step executes them.
 
 ## References
 
@@ -72,3 +72,7 @@ OWASP Foundation (n.d.) Logging Cheat Sheet. Available at: https://cheatsheetser
 Better Stack (n.d.) Ingesting logs. Available at: https://betterstack.com/docs/logs/ingesting-data/http/logs/ (Accessed: 9 November 2026).
 
 Better Stack (n.d.) Get started with logging. Available at: https://betterstack.com/docs/logs/logging-start/ (Accessed: 9 November 2026).
+
+## Recorded verification update - 9 November 2026
+
+The evidence package contains 13 passing logging tests and live Better Stack login_failed (401), login_succeeded (200), logout_succeeded (200), booking_created (201) and transaction_recorded events. Booking and transaction cloud events share requestId f68c1387-0d70-44b1-92fd-d94f2417852d; transaction identifiers match the application history screenshot. See [evidence index](../Evidence/Part3/Member2-Evidence-Index.md). These screenshots establish the recorded run, not guaranteed delivery or cloud alerts. A separate application-error cloud example, alert setup and container-specific real-event delivery are not established by this evidence package.

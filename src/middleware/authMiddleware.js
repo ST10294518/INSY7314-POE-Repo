@@ -1,3 +1,8 @@
+// Documentation references added during final review (9 November 2026).
+// JWT: https://github.com/auth0/node-jsonwebtoken
+// CRYPTO: https://nodejs.org/api/crypto.html
+// MONG: https://mongoosejs.com/docs/guide.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 const { digestToken, isRevoked } = require('../services/authSecurity');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');

@@ -1,3 +1,9 @@
+// Documentation references added during final review (9 November 2026).
+// AUTH: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+// BCRYPT: https://github.com/dcodeIO/bcrypt.js
+// JWT: https://github.com/auth0/node-jsonwebtoken
+// MONG: https://mongoosejs.com/docs/guide.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 const security = require('../services/authSecurity');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');

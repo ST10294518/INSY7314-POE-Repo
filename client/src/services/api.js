@@ -1,3 +1,6 @@
+// Documentation references added during final review (9 November 2026).
+// FETCH: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 
 const API_BASE = '/api'
 

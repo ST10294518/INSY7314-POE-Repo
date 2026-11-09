@@ -1,3 +1,6 @@
+// Documentation references added during final review (9 November 2026).
+// MONG: https://mongoosejs.com/docs/guide.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 const mongoose = require('mongoose');
 
 const gigSchema = new mongoose.Schema(

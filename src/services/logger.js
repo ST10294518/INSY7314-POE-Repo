@@ -1,3 +1,8 @@
+// Documentation references added during final review (9 November 2026).
+// LOG: https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html
+// CLOUD: https://betterstack.com/docs/logs/ingesting-data/http/logs/
+// CRYPTO: https://nodejs.org/api/crypto.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 // Structured logging with optional Better Stack HTTP delivery.
 // References: https://betterstack.com/docs/logs/ingesting-data/http/logs/
 // https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html

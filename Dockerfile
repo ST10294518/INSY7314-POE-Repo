@@ -1,3 +1,6 @@
+# Documentation references added during final review (9 November 2026).
+# DOCKER: https://docs.docker.com/compose/
+# See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 FROM node:24-bookworm-slim
 
 WORKDIR /app

@@ -1,3 +1,8 @@
+// Documentation references added during final review (9 November 2026).
+// EXP: https://expressjs.com/en/5x/api/
+// PROXY: https://expressjs.com/en/guide/behind-proxies/
+// HELMET: https://helmet.js.org/
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 
 const express = require('express');
 const helmet = require('helmet');

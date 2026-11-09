@@ -1,3 +1,8 @@
+# Documentation references added during final review (9 November 2026).
+# CI: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
+# DOCKER: https://docs.docker.com/compose/
+# SEMGREP: https://docs.semgrep.dev/semgrep-ci/sample-ci-configs
+# See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 name: HustleHub+ CI
 
 on:
