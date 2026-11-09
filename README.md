@@ -230,4 +230,3 @@ Before submitting: confirm current CI checks, review the dependency findings and
 ## Demonstration video
 
 [Watch the complete application demonstration](https://youtu.be/m6wVqAQ_yYQ)
-
