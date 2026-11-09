@@ -528,6 +528,8 @@ over HTTPS. See the Docker Compose section above for local startup commands.
 - [Run #3: tests and build recovered after the revert](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42450959998)
 - [Run #15: tests, Semgrep, and Compose smoke test passed](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42459982042)
 - [Run #21: Member 1 post-merge CI passed on Developer](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42462286422) | [Screenshot](Evidence/Part3/CI/07-developer-post-merge-passed.png)
+- [Expanded backend test log](Evidence/Part3/CI/08-merged-backend-tests-passed.png). All 10 added tests passed in the PR checks.
+- [Run #26](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42629217319) and [screenshot](Evidence/Part3/CI/09-developer-expanded-tests-passed.png). All three CI jobs passed on Developer after PR #4 merged at 431ec40.
 - [CI failure evidence](Evidence/Part3/CI/04-frontend-test-failed.png)
 - [Skipped build evidence](Evidence/Part3/CI/05-frontend-build-skipped.png)
 - [Successful recovery evidence](Evidence/Part3/CI/06-ci-recovery-passed.png)
