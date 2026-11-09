@@ -2,6 +2,8 @@
 
 A MERN freelance marketplace with Client, Freelancer and Administrator roles. All payments and revenue are **simulated**; no real charge is processed.
 
+youtube video:https://www.youtube.com/watch?v=m6wVqAQ_yYQ
+
 ## Features and team responsibilities
 
 | Role | Application flow |
