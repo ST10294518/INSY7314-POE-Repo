@@ -1,0 +1,143 @@
+# Documentation references added during final review (9 November 2026).
+# CI: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
+# DOCKER: https://docs.docker.com/compose/
+# SEMGREP: https://docs.semgrep.dev/semgrep-ci/sample-ci-configs
+# See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
+name: HustleHub+ CI
+
+on:
+  push:
+    branches:
+      - Feature/Member-1
+      - Developer
+  pull_request:
+    branches:
+      - Developer
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    name: Test backend and frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: npm --prefix client ci
+
+      - name: Run backend tests
+        run: npm test
+
+      - name: Run MongoDB security integration tests
+        shell: bash
+        env:
+          SECURITY_TEST_MONGODB_URI: mongodb://127.0.0.1:27018/hhst_kairah_security
+        run: |
+          docker run --detach --rm --name hustlehub-security-mongo \
+            --publish 127.0.0.1:27018:27017 mongo:7.0
+          trap 'docker stop hustlehub-security-mongo >/dev/null 2>&1 || true' EXIT
+
+          timeout 60s bash -c '
+            until docker exec hustlehub-security-mongo mongosh --quiet \
+              --eval "quit(db.adminCommand({ ping: 1 }).ok === 1 ? 0 : 1)" \
+              >/dev/null 2>&1; do
+              sleep 2
+            done
+          '
+
+          node scripts/run-security-integration.js
+
+      - name: Run frontend tests
+        run: npm --prefix client test
+
+      - name: Build frontend
+        run: npm --prefix client run build
+
+  static-analysis:
+    name: Scan backend and frontend with Semgrep
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Scan application source
+        run: |
+          docker run --rm \
+            --volume "$PWD:/src:ro" \
+            --workdir /src \
+            semgrep/semgrep:latest \
+            semgrep scan --error --strict --metrics=off \
+              --config p/javascript \
+              --config p/nodejs \
+              --config p/expressjs \
+              src client/src
+
+  compose-smoke:
+    name: Build and smoke-test Docker Compose stack
+    needs: [test-and-build, static-analysis]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Generate temporary CI configuration
+        run: |
+          umask 077
+          printf 'MONGODB_URI=mongodb://mongo:27017/hustlehub_ci\nJWT_SECRET=%s\n' \
+            "$(openssl rand -hex 32)" > .env
+          mkdir -p certs
+          openssl req -x509 -newkey rsa:2048 -sha256 -nodes \
+            -keyout certs/key.pem -out certs/cert.pem \
+            -days 1 -subj '/CN=localhost' \
+            -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
+          chmod 755 certs
+          chmod 644 certs/cert.pem
+          sudo chown 1000:1000 certs/key.pem
+          chmod_key_mode=600
+          sudo chmod "$chmod_key_mode" certs/key.pem
+
+      - name: Build and start the stack
+        run: |
+          docker compose -f compose.yml -f compose.ci.yml config --quiet
+          docker compose -f compose.yml -f compose.ci.yml up --build --detach --wait --wait-timeout 120
+          docker compose -f compose.yml -f compose.ci.yml ps
+
+      - name: Verify HTTPS frontend and API
+        run: |
+          curl --cacert certs/cert.pem --fail --silent --show-error \
+            --output /dev/null --write-out 'Booking page: HTTP %{http_code}\n' \
+            https://localhost:8443/client/bookings
+
+          curl --cacert certs/cert.pem --fail --silent --show-error \
+            --output "$RUNNER_TEMP/hustlehub-gigs.json" \
+            --write-out 'Gigs API via Nginx: HTTP %{http_code}\n' \
+            https://localhost:8443/api/gigs
+
+          python3 -c 'import json, sys; assert json.load(open(sys.argv[1]))["gigs"] == []' \
+            "$RUNNER_TEMP/hustlehub-gigs.json"
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose -f compose.yml -f compose.ci.yml logs --no-color --tail 80
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose -f compose.yml -f compose.ci.yml down --volumes

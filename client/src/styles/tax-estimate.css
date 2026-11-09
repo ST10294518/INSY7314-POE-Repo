@@ -1,0 +1,9 @@
+/*
+ * Documentation references added during final review (9 November 2026).
+ * CSS: https://developer.mozilla.org/en-US/docs/Web/CSS
+ * See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
+ */
+.tax-allocation { display: block; width: 100%; height: 24px; border-radius: 6px; overflow: hidden; }
+.tax-allocation-empty { fill: #e5e7eb; }
+.tax-allocation-reserve { fill: #b45309; }
+.tax-allocation-remaining { fill: #047857; }
