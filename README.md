@@ -549,9 +549,9 @@ scripts, frontend tests, Semgrep, and the HTTPS Compose smoke checks.
 
 ### Remaining limitations and integration checks
 
-- On the Member 1 branch, logout clears the browser's in-memory session. An
-  issued JWT remains valid until expiry unless server-side revocation is
-  integrated. Verify logout and token replay against the merged build.
+- Server-side logout revokes the presented token. CI verified that
+  revocation persists across a MongoDB reconnection. Browser verification
+  of logout and token replay on the merged Compose stack remains open.
 - The rate-limit scripts verify thresholds on a standalone Express server.
   Verify how requests from separate clients are counted behind Nginx on the
   integrated stack.
@@ -559,8 +559,11 @@ scripts, frontend tests, Semgrep, and the HTTPS Compose smoke checks.
   The Semgrep scan covers the files and rules reported in its summary, and the
   open `minimatch` development dependency advisory is recorded in the audit
   section above.
-- After integration, run Member 2's security tests in CI and record the
-  observed results here.
+- [GitHub Actions run #36](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42651327500) verified MongoDB-backed account lockout
+  and token revocation on `Developer` after PR #7 merged. All 11 scenarios
+  passed. Node reported 12 passes including the parent test, with zero
+  failures and zero skips.
+  See the [post-merge test log screenshot](Evidence/Part3/Security/02-developer-mongodb-security-integration-passed.png).
 
 
 <!-- MEMBER2-FEEDBACK-START -->
@@ -640,7 +643,7 @@ When code is copied or adapted, add a nearby comment naming the source and adapt
 <!-- MEMBER2-SECURITY-FEATURES -->
 ## Additional authentication security features
 
-Implemented persistent temporary account lockout and MongoDB-backed per-token revocation on logout. See [Security feature implementation, tests and limitations](docs/Member2-Security-Features.md). New endpoint: POST /api/auth/logout, available to any authenticated role. Lockout persists across API restarts; logout revokes only the presented token. Database integration and manual evidence must be verified before final submission. Add the new unit and isolated-database test commands to CI with Member 1.
+Implemented persistent temporary account lockout and MongoDB-backed per-token revocation on logout. See [Security feature implementation, tests and limitations](docs/Member2-Security-Features.md). New endpoint: POST /api/auth/logout, available to any authenticated role. Lockout persists across API restarts; logout revokes only the presented token. CI runs the authentication security unit tests and the isolated MongoDB integration suite. See the post-merge results above. Manual browser verification remains open.
 
 
 <!-- MEMBER2-LOGGING-MONITORING -->
