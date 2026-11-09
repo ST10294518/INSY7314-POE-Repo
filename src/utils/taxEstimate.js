@@ -1,3 +1,6 @@
+// Documentation references added during final review (9 November 2026).
+// Project coursework rule: flat 20% reserve; no official tax-rate source is claimed.
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 // Coursework assumption only: a flat 20% reserve, not a SARS calculation.
 const RATE = 0.20;
 function estimateTax(income) {

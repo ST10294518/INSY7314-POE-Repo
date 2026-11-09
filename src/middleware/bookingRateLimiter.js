@@ -1,3 +1,7 @@
+// Documentation references added during final review (9 November 2026).
+// RATE: https://express-rate-limit.mintlify.app/reference/configuration
+// AUTH: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 
 const { rateLimit } = require('express-rate-limit');
 

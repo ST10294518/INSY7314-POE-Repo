@@ -1,3 +1,7 @@
+// Documentation references added during final review (9 November 2026).
+// RATE: https://express-rate-limit.mintlify.app/reference/configuration
+// AUTH: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 // Adapted using express-rate-limit documentation and OWASP login-throttling guidance.
 // AI-assisted implementation: OpenAI ChatGPT, 8 November 2026. See README attribution.
 const { rateLimit, ipKeyGenerator } = require('express-rate-limit');

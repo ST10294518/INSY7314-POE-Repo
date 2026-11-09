@@ -1,656 +1,228 @@
-# HustleHub+ — INSY7314 Part 2
+# HustleHub+ - INSY7314 POE, Parts 2 and 3
 
-HustleHub+ is a secure MERN-stack freelance marketplace built with MongoDB,
-Express, React and Node.js. It supports three roles: Client, Freelancer and
-Administrator. Clients browse services and create Bookings; Freelancers manage
-Gigs, received Bookings and simulated-payment income; Administrators monitor
-Users, Gigs, Bookings, Transactions and marketplace statistics through a
-protected, read-only dashboard.
+A MERN freelance marketplace with Client, Freelancer and Administrator roles. All payments and revenue are **simulated**; no real charge is processed.
 
-> **Payment disclaimer:** All Transactions and revenue figures in this project
-> are simulated. HustleHub+ does not process real payments.
+## Features and team responsibilities
 
-## Features by role
+| Role | Application flow |
+| --- | --- |
+| Client | Register/sign in, search gigs, view service details, book using simulated payment, view confirmation and own booking history |
+| Freelancer | Register/sign in, create/edit/soft-delete own gigs, view received bookings, own completed transaction history, income and coursework tax reserve |
+| Administrator | Separately provisioned account; read-only, paginated oversight of users, active gigs, bookings, transactions and statistics |
 
-| Role | Main functionality | Access |
-| --- | --- | --- |
-| Client | Register and sign in; browse/filter Gigs; view details; book services; view confirmation and Booking history | `/client` |
-| Freelancer | Register and sign in; create, edit and delete own Gigs; view received Bookings, income and Transactions | `/freelancer` |
-| Administrator | Sign in with a separately provisioned account; view marketplace statistics, Users, Gigs, Bookings and Transactions; refresh and paginate lists | `/admin` |
+Part 2 implementation responsibilities and historical API results are retained in [README history](docs/README-HISTORY.md). Part 3 responsibilities: Member 1 - CI, Semgrep, Docker/HTTPS, trusted proxy setup and infrastructure evidence; Member 2 - tax dashboard, persistent authentication controls, structured/cloud logging, historical gig preservation and evidence assembly. Shared integration uses **Developer** and feature branches **Feature/Member-1** and **Feature/Member-2**. Submit PRs to Developer and verify their current checks before merging.
 
-Only Client and Freelancer accounts can be created through public registration.
-Admin accounts must be provisioned separately.
+## Prerequisites and installation
 
-## Responsibilities
-
-- Member 1: MongoDB User integration, Gig APIs, Freelancer interface,
-  Helmet, CSP, Freelancer React tests and Authentication/Gig API tests.
-- Member 2: shared Login/Register screens, Client interface, Booking and
-  Transaction APIs, income calculations, authentication/booking limits,
-  and the Admin Dashboard, Admin API and account provisioning.
-- Member 1 also prepared additional Client/Booking integration, Admin API,
-  rate-limit and frontend test evidence after the feature implementations.
-
-Develop is the integration branch. Completed work is submitted through
-pull requests from Feature/Freelancer and Feature/Booking.
-
-## Local setup
-
-Prerequisites: Node.js, npm, Git and access to the agreed MongoDB Atlas
-development database. Use the committed lockfiles when installing.
-
-From the repository root:
+Use Node.js 24 to match CI, npm, Git, and a MongoDB Atlas database accessible from the machine/container. Booking/payment operations use MongoDB transactions, so use a replica set or Atlas deployment supporting transactions. Local CI's standalone MongoDB is used for authentication integration and a read-only smoke test, not a complete booking transaction rehearsal.
 
 ```powershell
 npm ci
 npm --prefix client ci
 ```
 
-Create a private .env file in the repository root:
+Create a private root `.env` using these placeholders; replace values locally:
 
 ```dotenv
 PORT=5443
-SSL_KEY_PATH=./certs/key.pem
-SSL_CERT_PATH=./certs/cert.pem
-JWT_SECRET=REPLACE_WITH_A_PRIVATE_RANDOM_SECRET
+MONGODB_URI=REPLACE_WITH_PRIVATE_APPLICATION_DATABASE_URI
+JWT_SECRET=REPLACE_WITH_PRIVATE_RANDOM_SECRET
 JWT_EXPIRES_IN=1h
 BCRYPT_SALT_ROUNDS=12
-MONGODB_URI=REPLACE_WITH_YOUR_PRIVATE_ATLAS_CONNECTION_STRING
+SSL_KEY_PATH=./certs/key.pem
+SSL_CERT_PATH=./certs/cert.pem
+# Optional, for isolated security tests:
+SECURITY_TEST_MONGODB_URI=REPLACE_WITH_PRIVATE_TEST_DEPLOYMENT_URI
+# Optional, for Better Stack cloud export:
+BETTER_STACK_SOURCE_TOKEN=REPLACE_WITH_PRIVATE_SOURCE_TOKEN
+BETTER_STACK_INGESTING_HOST=REPLACE_WITH_SOURCE_INGESTING_HOST
 ```
 
-Both members must connect to the agreed Atlas cluster and database so
-User, Gig, Booking and Transaction references resolve to shared records.
-Use a database account with read/write access to that database and add
-your current public IP to Atlas Network Access.
+Omit optional entries when not used; do not leave an optional test URI placeholder if you intend to use the application's deployment as the test connection. The integration suite selects a separate database explicitly (see below). Keep `.env`, private keys, tokens and Postman environments out of Git. Atlas Network Access must allow the current public IP, and the database user must have appropriate database-scoped permissions. Old JSON-store accounts are not automatically migrated; register test accounts against the active MongoDB database.
 
-Do not commit .env, database credentials or private certificates.
+### Trusted local HTTPS
 
-## Local HTTPS certificates
-
-Place a local certificate and private key in certs/cert.pem and
-certs/key.pem. The certificate must cover localhost.
-
-For example, using OpenSSL included with Git for Windows:
+Do not replace existing working certificates. For a new setup, install mkcert and generate local files:
 
 ```powershell
+mkcert -install
 New-Item -ItemType Directory -Path certs -Force | Out-Null
-
-& 'C:\Program Files\Git\usr\bin\openssl.exe' req `
-    -x509 -newkey rsa:2048 -sha256 -nodes `
-    -keyout certs/key.pem -out certs/cert.pem `
-    -days 365 -subj '/CN=localhost' `
-    -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
+mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost 127.0.0.1 "::1"
 ```
 
-Generate certificates only if valid local files are not already present.
-Trust the local certificate appropriately when directly accessing HTTPS.
-For curl and Newman, supply certs/cert.pem as the trusted certificate.
-For Postman, add cert.pem under CA certificates and keep SSL verification on.
+Vite and Nginx verify the backend using `certs/cert.pem`. For the mkcert-issued leaf, append its public root CA once to make the trust bundle used by these clients:
 
-## Start the application
+```powershell
+$caDirectory = (mkcert -CAROOT).Trim()
+$certificatePath = Join-Path (Get-Location).Path "certs/cert.pem"
+$bundle = [IO.File]::ReadAllText($certificatePath) + "`n" + [IO.File]::ReadAllText((Join-Path $caDirectory "rootCA.pem"))
+[IO.File]::WriteAllText($certificatePath, $bundle, (New-Object Text.UTF8Encoding($false)))
+```
 
-Backend terminal, from the repository root:
+Never copy or publish mkcert's rootCA-key.pem. The earlier self-signed OpenSSL alternative remains in [historical setup](docs/README-HISTORY.md#local-https-certificates); it uses a different certificate trust approach. Do not disable TLS verification to work around connection errors. These are local development certificates, not public production certificates.
+
+### Development servers
+
+Leave the backend running in one terminal and frontend in another:
 
 ```powershell
 npm start
 ```
 
-MongoDB connects before the HTTPS API starts at https://localhost:5443.
-npm run dev is available for watched development.
-
-Frontend development terminal:
-
 ```powershell
 npm --prefix client run dev
 ```
 
-Vite development runs at https://localhost:5173. Use the URL printed in the terminal.
+API: https://localhost:5443. Frontend: https://localhost:5173. Vite proxies same-origin `/api` to the HTTPS API and verifies its certificate. Production build: `npm --prefix client run build`; optional local preview: `npm --prefix client run preview` at https://localhost:4173. Stopping either development server stops its service.
 
-To build and inspect the frontend with preview CSP:
+### Docker Compose
 
-```powershell
-npm --prefix client run build
-npm --prefix client run preview
-```
-
-Preview runs at https://localhost:4173.
-
-Vite development and preview use `certs/cert.pem` and `certs/key.pem`.
-Follow the certificate generation steps above before starting either server.
-On Windows, add the public localhost certificate you generated to your
-current-user Trusted Root Certification Authorities store, then reopen Chrome.
-Keep the private key and `.env` out of Git.
-
-The frontend makes same-origin `/api` requests. Vite forwards them to
-`https://localhost:5443` and verifies the backend certificate against
-`certs/cert.pem`. Frontend builds and tests can run without these local files.
-
-- [Confirmed booking over HTTPS](Evidence/Part3/HTTPS/01-booking-over-https.png)
-- [Chrome HTTPS verification](Evidence/Part3/HTTPS/02-chrome-valid-https.png)
-
-## Run HustleHub+ with Docker Compose
-
-Start Docker Desktop and make sure the Linux engine is running. From the
-repository root, prepare the local `.env` and `certs/` directory using the setup
-steps above. Set `MONGODB_URI` to your test database URI and `JWT_SECRET` to a
-locally generated secret. Compose mounts `certs/cert.pem` and `certs/key.pem`
-read-only and sets the certificate paths inside the backend container.
+Start Docker Desktop's Linux engine; prepare `.env` and `certs/` first:
 
 ```powershell
+docker info --format '{{.OSType}}'
 docker compose config --quiet
-docker compose up --build --detach --wait --wait-timeout 120
+docker compose up --build --detach --wait --wait-timeout 180
 docker compose ps
 ```
 
-Open [HustleHub+](https://localhost:8443/). Nginx serves the React build on
-port `8443` and forwards `/api` requests to the Express backend on port `5443`
-inside the Compose network. It verifies the backend certificate using
-`certs/cert.pem`.
-
-To verify the React route and API over HTTPS, run:
+Open https://localhost:8443. Compose builds frontend and backend; Nginx serves the React build on loopback port 8443 and proxies to the internal HTTPS backend port 5443 with certificate verification. Normal Compose uses the configured external Atlas database; only `compose.ci.yml` adds a temporary MongoDB 7 container.
 
 ```powershell
-curl.exe --cacert ".\certs\cert.pem" --head https://localhost:8443/client/bookings
-curl.exe --cacert ".\certs\cert.pem" --fail https://localhost:8443/api/gigs
-```
-
-The booking route should return `200 OK` with HTML. The gigs endpoint should
-return `200 OK` with a JSON `gigs` array. To stop the local stack, run:
-
-```powershell
+curl.exe --cacert certs/cert.pem --fail https://localhost:8443/api/gigs
+docker compose logs --tail 50 backend
+# Stop containers when finished:
 docker compose down
 ```
 
-GitHub Actions builds both application images and runs the stack with
-`compose.ci.yml`. That file adds a temporary MongoDB 7 container to work around
-the MongoDB 8 startup incompatibility observed on the CI runner. CI generates
-its own certificate and JWT secret, verifies both HTTPS routes, checks the
-JSON response, and removes the temporary stack and volumes.
+The controlled single Nginx proxy has address `172.30.254.2`; Compose sets `TRUSTED_PROXY_IP` to that address. Nginx overwrites `X-Forwarded-For` with `$remote_addr`; Express trusts only the configured proxy address. A different network or upstream load balancer requires a reviewed topology and header policy. Do not set blanket `trust proxy = true`. See [Express proxy documentation](https://expressjs.com/en/guide/behind-proxies/).
 
-- [Local Compose and HTTPS checks](Evidence/Part3/Docker/01-local-compose-https.png)
-- [Passing GitHub Actions run #15](Evidence/Part3/Docker/02-ci-compose-passed.png)
-- [Containers running in CI](Evidence/Part3/Docker/03-ci-containers-running.png)
-- [HTTPS smoke checks in CI](Evidence/Part3/Docker/04-ci-https-checks-passed.png)
+## Complete application flow
 
-## Authentication and shared User model
+1. Sign in as Freelancer and create a gig with title, description, price and optional category.
+2. Log out, sign in as Client, search for the service and click View Gig.
+3. Click Book Gig once. Successful simulated payment creates a confirmed Booking and completed Transaction together. The API derives client, freelancer and price from authenticated identity and stored gig data.
+4. Show the confirmation references before refreshing. Transaction details on that confirmation page come from the immediate response and are unavailable there after refresh; saved history remains available.
+5. Open View My Bookings and View Details; refresh the details page to retrieve the saved record.
+6. Sign in as the original Freelancer; view Received bookings, Refresh income and Transaction history.
+7. Optional infrastructure evidence: match application references to Atlas documents and Better Stack events.
 
-Authentication uses MongoDB rather than the previous JSON user store.
-Passwords are hashed with bcrypt. Responses exclude password fields.
-JWTs contain MongoDB user IDs and are verified using HS256.
-Protected requests load the current User document from MongoDB.
+The frontend supplies an Idempotency-Key for booking retries. A retry of a completed operation with the same client/key returns its existing records instead of a second transaction. Real payment processing is out of scope. Admins do not create or alter marketplace records through the read-only dashboard.
 
-Public registration accepts Client and Freelancer roles only.
-The schema supports Admin, but public registration cannot create Admins.
-Member 2 implemented separate Admin provisioning and an Admin-only oversight dashboard.
+## Consolidated API reference
 
-Existing users.json accounts are not automatically migrated. Register
-development accounts through the MongoDB authentication API.
+Protected routes require `Authorization: Bearer <JWT>`. Role checks use the current MongoDB user. Lists/details return their route-specific JSON wrappers. Admin list endpoints support `page` and `limit` (20 default, 50 maximum).
 
-Authentication validates body shape, permitted fields, email types and
-format, role choices and password strength. Passwords are limited to
-72 UTF-8 bytes to respect bcrypt's input limit.
+| Method | Endpoint | Access | Purpose |
+| --- | --- | --- | --- |
+| GET | `/` | Public | API status message |
+| POST | `/api/auth/register` | Public; Client/Freelancer only | Register |
+| POST | `/api/auth/login` | Public | Sign in |
+| GET | `/api/auth/me` | Any authenticated role | Current safe profile |
+| POST | `/api/auth/logout` | Any authenticated role | Revoke presented token |
+| GET | `/api/gigs` | Public | Active services |
+| GET | `/api/gigs/mine` | Freelancer | Own active gigs |
+| GET | `/api/gigs/:id` | Public | Active service details |
+| POST | `/api/gigs` | Freelancer | Create own gig |
+| PUT | `/api/gigs/:id` | Freelancer owner | Update own active gig |
+| DELETE | `/api/gigs/:id` | Freelancer owner | Soft-delete own gig |
+| POST | `/api/bookings` | Client | Booking and simulated transaction; Idempotency-Key required |
+| GET | `/api/bookings/mine` | Client | Own booking history |
+| GET | `/api/bookings/freelancer` | Freelancer | Own received bookings |
+| GET | `/api/bookings/:id` | Authenticated matching client/freelancer ID | Own booking; non-participant gets 404 |
+| GET | `/api/transactions/income` | Freelancer | Own completed income and coursework estimate |
+| GET | `/api/transactions/mine` | Freelancer | Own transaction history |
+| GET | `/api/admin/me` | Admin | Verify access |
+| GET | `/api/admin/overview` | Admin | Counts and completed simulated revenue |
+| GET | `/api/admin/users` | Admin | Paginated users |
+| GET | `/api/admin/gigs` | Admin | Paginated active gigs |
+| GET | `/api/admin/bookings` | Admin | Paginated bookings |
+| GET | `/api/admin/transactions` | Admin | Paginated transactions |
 
-## Gig API contract
+Admin provisioning is opt-in via `scripts/provision-admin.js`; it hashes the private password and refuses to overwrite an existing account. Public registration cannot provision Admins. Follow [private provisioning instructions](docs/README-HISTORY.md#provisioning); remove provisioning credentials and enabling flags after use.
 
-| Method | Route | Access |
+## Authentication rate limits for real users and shared IPs
+
+An IP may represent many campus, household or mobile users. Account-based failure budgets avoid applying a five-failure limit to every unrelated person on that network (OWASP, Authentication Cheat Sheet; express-rate-limit configuration - see [references](docs/PROJECT-ATTRIBUTIONS.md)).
+
+| Control | Project default | Scope and limitation |
 | --- | --- | --- |
-| POST | /api/gigs | Authenticated Freelancer |
-| GET | /api/gigs | Public |
-| GET | /api/gigs/mine | Authenticated Freelancer's own Gigs |
-| GET | /api/gigs/:id | Public |
-| PUT | /api/gigs/:id | Freelancer owner |
-| DELETE | /api/gigs/:id | Freelancer owner |
+| Login network ceiling | 200 requests / 15 minutes | Resolved IP/IPv6 subnet; includes malformed requests |
+| Login failure budget | 5 unsuccessful requests / 15 minutes | SHA-256 key of normalized email; account bucket spans networks |
+| Registration | 10 requests / hour | Shared network budget; busy shared networks can still be throttled |
+| Booking | 10 requests / 15 minutes | Network-based limiter, applied after Client authentication |
+| Persistent lockout | 5 failed passwords, 15-minute inactivity observation reset, 15-minute lock | Stored per account; rate limiter can reject earlier with 429 |
 
-The Mongoose model is Gig. Fields include title, description, price,
-optional category, freelancer, createdAt and updatedAt.
-freelancer references User using an ObjectId.
+Successful logins are removed from the in-memory failure budget but do not reset its earlier failures. The separate persistent account state resets on successful login. Limits are coursework defaults, not universal recommended capacities: tune from measured use and support impact. Hashing limiter keys avoids storing raw email as the key but is not encryption. Successful concurrent requests can temporarily occupy account budget.
 
-Creation assigns ownership from req.user._id. Submitted ownership fields
-are rejected. Updates require the permitted Gig fields and preserve ownership.
-Prices must be positive JSON numbers with at most two decimal places.
+Default limiter MemoryStore is process-local and resets on restart. Multiple replicas need a shared store and tested failure policy. The MongoDB lock persists independently. Do not exempt shared public networks entirely; account recovery, MFA and risk-based challenges can reduce abuse and deliberate victim lockout. The configured trusted proxy must match the real deployment path; reassess if adding a public edge/load balancer.
 
-List responses use { gigs }; individual responses use { gig }.
-Public Gig responses populate freelancer with _id and email.
-Own-Gig responses retain freelancer as its ObjectId string.
+## Security review and additional controls
 
-Member 2 uses the stored Gig price and Freelancer reference for bookings,
-rather than accepting those values from the Client.
-
-## Freelancer interface
-
-The /freelancer route is restricted to authenticated Freelancers.
-
-The dashboard provides:
-
-- Account details and logout.
-- Own-Gig listing and refresh.
-- Create and Edit forms with validation and retry handling.
-- Delete confirmation with cancellation and pending controls.
-- Received bookings from /api/bookings/freelancer.
-- Income from /api/transactions/income.
-- Transaction history from /api/transactions/mine.
-- Loading, empty, success and error states.
-
-The Freelancer stylesheet matches the shared Client design and scopes
-its colours, inputs, cards and responsive layout to the Freelancer page.
-
-Income represents completed simulated payments, not real payment processing.
-
-## Security
-
-Backend protections include JWT checks, Freelancer permissions, ownership
-checks, permitted-field validation, input trimming and rejection of script
-markup/control characters in Gig text.
-
-Helmet provides API security headers and CSP. The Express error handler
-returns safe responses for malformed JSON, oversized bodies, invalid data,
-duplicate records, missing routes and unexpected errors.
-
-Member 2 provides Login, Registration and Booking rate limiting.
-Their middleware suites and the separate endpoint rate-limit tests passed.
-
-Frontend preview sends CSP on the HTML response. It restricts scripts and
-styles to self, blocks inline scripts and event handlers, blocks objects
-and framing, and permits the configured API connection.
-
-API CSP alone does not protect a frontend served from another origin.
-Preview headers apply to Vite preview; any future deployed frontend host
-must configure its own corresponding response headers.
-
-Evidence is stored in Evidence/Security, including response headers and
-a screenshot demonstrating blocked inline script execution.
-
-## Tests and evidence
-
-The following commands verify the React frontend:
-
-```powershell
-npm --prefix client test
-npm --prefix client run build
-npm --prefix client run lint
-```
-
-The original Freelancer-only run passed 25 tests across six files. The later
-combined Client/Freelancer run passed **41 tests across nine files** (25
-Freelancer tests and 16 Client tests). These use mocked API responses and
-cover Gig workflows, Booking UI, navigation, received Bookings, income,
-loading/empty states, form validation and error recovery. The React suite
-does **not** include automated Admin Dashboard component tests; Admin API
-and manual UI verification are recorded separately below.
-
-See client/src/tests/README.md and
-Evidence/Testing/client-freelancer-react-results.json.
-
-Authentication/Gig API tests passed in both Postman and Newman:
-47 requests, 99 assertions and zero failures. Newman exited with code 0.
-
-See [API test instructions](Postman%20Collection/README-Part2-Freelancer.md)
-for prerequisites, expired-token preparation, certificate trust and commands.
-
-Evidence:
-
-- Evidence/Testing/freelancer-api-results.xml
-- Evidence/Testing/freelancer-postman-run.png
-
-Newman runs through pinned npx outside project dependencies because its
-dependency tree reported vulnerabilities. This does not remediate Newman
-itself; the testing-tool limitation is documented in the API test instructions.
-
-## Troubleshooting and final sign-off
-
-A frontend HTTP 502 can indicate that the local backend proxy target is
-unavailable. Check the backend terminal and MongoDB connection first.
-
-Intermittent Atlas network/TLS connection failures were observed after a
-network change. Successful retries do not establish a permanent fix.
-Check current IP access, DNS, connectivity and backend startup; do not
-disable MongoDB TLS verification.
-
-Before submission, confirm the agreed integration branch contains all required
-code, the local application still runs, the video/screenshots meet the rubric,
-and the team has completed final joint sign-off. Recorded test passes are
-important evidence but do not, by themselves, guarantee full rubric marks.
-
-## Freelancer screenshot evidence
-
-The Client and Freelancer interfaces use the shared Barbie Pink `#E0218A`
-accent (`--theme-pink`) with dark navy text for readability. The global theme
-variable is defined in `client/src/index.css`; Admin and Freelancer pages also
-have scoped stylesheets. Some evidence screenshots may show the earlier pink
-colour because they were captured before the final styling change.
-
-Screenshots of the Freelancer interface:
-
-- [Dashboard and Create Gig](Evidence/Freelancer/dashboard-and-create-gig.png)
-- [Create Gig form](Evidence/Freelancer/create-gig-form.png)
-- [Edit Gig form](Evidence/Freelancer/edit-gig-form.png)
-- [Delete Gig confirmation](Evidence/Freelancer/delete-gig-confirmation.png)
-- [Received bookings](Evidence/Freelancer/received-bookings.png)
-- [Income and transactions](Evidence/Freelancer/income-and-transactions.png)
-
-Frontend CSP evidence:
-
-- [Freelancer inline script blocked](Evidence/Security/freelancer-csp-inline-script-blocked.png)
-
-## Client frontend CSP verification
-
-Client dashboard navigation, Gig details and My Bookings were checked
-in the frontend preview without console errors during normal use.
-An injected inline script was blocked by CSP, and its execution marker
-remained unset.
-
-- [Client inline script blocked](Evidence/Security/client-csp-inline-script-blocked.png)
-
-These checks apply to the local Vite preview configuration.
-
-## Booking and Transaction integration results
-
-The live application rehearsal passed:
-Client booking created a matching MongoDB Transaction, the Freelancer
-received the Booking, income increased by R125.50, and the completed
-transaction count increased by one. Results persisted after refresh.
-
-Automated Newman results:
-
-- Booking/Transaction integration: 38 requests and 78 assertions passed.
-- Endpoint rate limits: 34 requests and 44 assertions passed.
-- Both runs had zero failures and exited with code 0.
-
-The integration suite verifies trusted pricing, identities, sequential
-idempotent retries, roles, ownership, JWT rejection and isolated income.
-The rate-limit suite verifies Login, Registration and Booking limits
-through the actual API endpoints.
-
-See [Integration test instructions](Postman%20Collection/README-Part2-Integration.md)
-for commands, test data, evidence and limitations.
-
-## Combined Client and Freelancer React tests
-
-The combined run passed 41 tests across nine files:
-25 Freelancer tests and 16 Client tests.
-
-Client coverage includes Gig browsing and filtering, Booking submission,
-confirmation navigation, retry-key preservation, pending controls,
-Booking history and recovery from errors.
-
-Production build and ESLint passed. Application code was unchanged
-when adding these Client tests.
-
-Report: Evidence/Testing/client-freelancer-react-results.json
-
-See client/src/tests/README.md for coverage and execution instructions.
-
-## Admin permissions and verification
-
-Member 2 implemented the Admin dashboard and backend.
-Admins have read-only oversight of users, Gigs, Bookings and Transactions,
-plus overview counts and total completed simulated revenue.
-This access is separate from Client booking and Freelancer Gig ownership.
-
-All /api/admin routes require a valid JWT and the current MongoDB
-User's Admin role. Public registration cannot create Admin accounts.
-User responses exclude password hashes.
-
-Admin lists default to 20 records per page and cap the limit at 50.
-
-
-### Admin API endpoints
-
-All routes below require `Authorization: Bearer <JWT>` from a current User
-whose role is `admin`:
-
-| Method | Endpoint | Purpose |
+| Threat | Implemented protection | Evidence / limits |
 | --- | --- | --- |
-| GET | `/api/admin/me` | Verify Admin identity/permissions |
-| GET | `/api/admin/overview` | Read counts and total completed simulated revenue |
-| GET | `/api/admin/users` | Read paginated Users and roles |
-| GET | `/api/admin/gigs` | Read paginated Gig information |
-| GET | `/api/admin/bookings` | Read paginated Booking information |
-| GET | `/api/admin/transactions` | Read paginated simulated Transactions |
+| Injection and client tampering | Allowlisted fields and typed validation; server chooses booking price and identities | Booking validation and historical API reports |
+| XSS and browser script injection | React text rendering, restricted gig text, frontend CSP, Helmet API headers | CSP evidence; no claim of protection against every XSS vector |
+| Credential abuse | bcrypt hashing, password input limits, generic login failure, layered limits, MongoDB temporary lock | Unit/shared-IP/DB integration tests; lockout can be abused for denial of service |
+| Stolen or replayed JWT | HS256 signature/expiry, random jti, digest-only revocation checked on protected requests | Logout revokes only presented token; other sessions and already authorised requests remain |
+| Broken access control | Server role and ownership checks, authenticated account-scoped queries | API reports and two-account UI comparison; Admin has separate read-only endpoints |
+| Historical data loss | Soft-delete Gig flags; active queries exclude deleted gigs, history references retained | Active list, booking history and transaction screenshots |
+| Transport interception | Local trusted HTTPS and Nginx-to-backend TLS verification | Local/Compose screenshots; local certificates are not production deployment |
+| Sensitive log exposure | Allowlisted fields; no bodies, passwords, raw JWTs, queries or raw errors | Logging unit tests and live cloud JSON payloads |
 
-List endpoints support `page` and `limit` query parameters; the default
-limit is 20 and the maximum limit is 50. The Admin interface has no edit or
-delete functionality. An unauthenticated request is rejected with HTTP 401,
-while an authenticated non-Admin request is rejected with HTTP 403.
+Additional controls are detailed in [persistent account lockout and per-token revocation](docs/Member2-Security-Features.md). Revocation reads fail closed on database errors. TTL cleanup is asynchronous; authorization checks expiry separately. These are implementation and recorded-test claims, not a comprehensive penetration-test certification.
 
-### Provisioning
+## Income and coursework tax estimate
 
-scripts/provision-admin.js creates an Admin directly in MongoDB.
-It requires ADMIN_PROVISION_ENABLED=true and private ADMIN_EMAIL and
-ADMIN_PASSWORD environment variables, hashes the password with bcrypt,
-and refuses to alter an existing account.
+Only the authenticated freelancer's completed simulated transactions contribute to all-time income; refunded records are excluded. The illustrative 20% reserve rounds to cents and computes the remainder by subtraction. R1,000 produces R200 reserve and R800 remaining. This is not an annual SARS calculation and omits tax brackets, rebates, deductions, expenses and other income. See [tax design and verification](docs/Member2-Tax-Dashboard.md).
 
-The password validation requires at least 12 JavaScript string characters
-and no more than 72 UTF-8 bytes. Provisioning values must remain private, and the enabling
-flag and password should be removed after use.
+## Logging and Better Stack
 
-
-Provisioning is disabled by default. For an authorised one-time setup,
-from a **new PowerShell session**, use the same MongoDB database as the app:
+Structured stdout includes time, service, event, request ID, normalized endpoint, status and duration. Optional Better Stack credentials remain private in `.env`. Restart/recreate the relevant service after configuration changes.
 
 ```powershell
-$env:ADMIN_PROVISION_ENABLED = "true"
-$env:ADMIN_EMAIL = "admin-demo@example.com"
-$secure = Read-Host "Enter a unique Admin password" -AsSecureString
-$env:ADMIN_PASSWORD = [System.Net.NetworkCredential]::new("", $secure).Password
-node scripts/provision-admin.js
-Remove-Item Env:ADMIN_PASSWORD,Env:ADMIN_EMAIL,Env:ADMIN_PROVISION_ENABLED -ErrorAction SilentlyContinue
-Remove-Variable secure -ErrorAction SilentlyContinue
+node scripts/test-cloud-logging.js
 ```
 
-Use a private Admin email and a strong password. Do not persist the
-provisioning flag or password in `.env` or commit any credentials. The script
-refuses to overwrite an existing account; it does not reset passwords.
+This emits a synthetic connectivity event, not a real booking. Real cloud screenshots separately show login success/failure, logout, booking creation and committed simulated transaction events. Search `transaction_recorded` in Live tail, then match its requestId to `booking_created` and record IDs to application history. Logs use UTC; Better Stack may display SAST. See [logging setup and delivery limits](docs/Member2-Logging-Monitoring.md).
 
-An existing shared Admin account was used for verification.
-No additional Admin account was provisioned during these tests.
+Cloud export is best effort: bounded queue, timeout and retries; no durable spool. Outage/restart may lose pending records and retries may duplicate them. It is not a guaranteed financial ledger. Cloud alerts, retention and production access policies require separate configuration.
 
-### Recorded verification
-
-The Admin Newman suite passed 41 requests and 61 assertions,
-with zero failures and exit code 0.
-
-Verified all six Admin endpoints:
-
-- Admin requests return 200.
-- Client and Freelancer requests return 403.
-- Missing, invalid and expired JWTs return 401.
-- Password fields are excluded.
-- List pagination is returned and the maximum limit is enforced.
-- Public Admin registration is rejected.
-
-Manual browser checks passed for Users, Gigs, Bookings, Transactions,
-refresh, pagination and logout. Client/Freelancer page access was blocked.
-Opening /admin after logout redirected to Login.
-
-The post-merge Client/Freelancer suite also passed all 41 React tests.
-Frontend build and ESLint passed. These component tests do not include
-automated Admin dashboard coverage.
-
-### Test execution and evidence
-
-Collection:
-Postman Collection/HustleHub-Part2-Admin-Tests.postman_collection.json
-
-Supply adminEmail, adminPassword and expiredToken through a private
-temporary Postman environment. Use an expired JWT signed with the current
-local JWT secret. Never commit the environment or credentials.
-
-Run from the repository root with the HTTPS backend running:
+## Tests, CI and evidence
 
 ```powershell
-npx --yes --package=newman@6.2.3 newman run "Postman Collection/HustleHub-Part2-Admin-Tests.postman_collection.json" --environment "<PRIVATE_ENVIRONMENT_PATH>" --ssl-extra-ca-certs certs/cert.pem --reporters cli,junit --reporter-junit-export Evidence/Testing/admin-api-results.xml --timeout-request 20000 --bail
-```
-
-Remove the private temporary environment after execution.
-The suite creates two ordinary test accounts and reads existing Admin data.
-Registration attempts remain subject to the configured rate limit.
-The Newman dependency limitation described earlier also applies here.
-
-Evidence:
-
-- [Admin API report](Evidence/Testing/admin-api-results.xml)
-- [Admin Newman summary](Evidence/Testing/admin-api-newman-run.png)
-
-
-### Part 3 dependency audit
-
-- **Backend:** `npm audit` reported zero vulnerabilities after updating `body-parser`, `ip-address`, and `qs`. All three backend test scripts passed after a clean install.
-- **Frontend production dependencies:** `npm --prefix client audit --omit=dev` reported zero vulnerabilities.
-- **Frontend development dependencies:** The full audit still reports four moderate entries linked to one [`minimatch` advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249) in the ESLint dependency chain. The installed version is `10.2.6`, and the advisory lists `11.0.1` as the first patched version. The latest ESLint and `@eslint/config-array` versions checked still require `minimatch` 10.x. ESLint 10 was retained because npm proposed a major-version downgrade. The advisory remains open and should be rechecked when the upstream dependency ranges change. Lint, all 41 frontend tests, the production build, and CI passed on commit `dd0e131`.
-- **Static source analysis:** The baseline Semgrep scan ran 70 rules on 51 files and reported zero findings in the scanned files. See the [Semgrep scan evidence](Evidence/Part3/StaticAnalysis/01-semgrep-baseline-passed.png).
-
-## GitHub Actions CI
-
-The workflow in `.github/workflows/ci.yml` runs on pushes to
-`Feature/Member-1` and `Developer`, and on pull requests targeting `Developer`.
-It uses Node.js 24 and installs backend and frontend dependencies from their
-lockfiles before running the tests and building the React frontend.
-
-To reproduce the test-and-build job from the repository root:
-
-```powershell
-npm ci
-npm --prefix client ci
 npm test
 npm --prefix client test
 npm --prefix client run build
+npm --prefix client run lint
+node scripts/run-security-integration.js
 ```
 
-The backend test command runs authentication rate-limit, booking rate-limit,
-and booking validation checks. Semgrep scans the backend and frontend source
-in a separate job. Once the test-and-build and Semgrep jobs pass, the Compose
-job builds both application images and checks the React page and proxied API
-over HTTPS. See the Docker Compose section above for local startup commands.
+The final command is separate and requires a permitted test deployment. The integration suite explicitly uses **hhst_kairah_security** and drops that database during cleanup. Use a dedicated disposable test database with create/index/read/write/drop permissions; do not point the suite at valuable test records or run it concurrently. The runner prefers SECURITY_TEST_MONGODB_URI, falling back to MONGODB_URI. It does not use the URI's database name as its cleanup target.
 
-- [Run #1: initial tests and build passed](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42448870578)
-- [Run #2: deliberate test failure skipped the build](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42450301541)
-- [Run #3: tests and build recovered after the revert](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42450959998)
-- [Run #15: tests, Semgrep, and Compose smoke test passed](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42459982042)
-- [Run #21: Member 1 post-merge CI passed on Developer](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42462286422) | [Screenshot](Evidence/Part3/CI/07-developer-post-merge-passed.png)
-- [Expanded backend test log](Evidence/Part3/CI/08-merged-backend-tests-passed.png). All 10 added tests passed in the PR checks.
-- [Run #26](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42629217319) and [screenshot](Evidence/Part3/CI/09-developer-expanded-tests-passed.png). All three CI jobs passed on Developer after PR #4 merged at 431ec40.
-- [CI failure evidence](Evidence/Part3/CI/04-frontend-test-failed.png)
-- [Skipped build evidence](Evidence/Part3/CI/05-frontend-build-skipped.png)
-- [Successful recovery evidence](Evidence/Part3/CI/06-ci-recovery-passed.png)
+Recorded local verification after updating through 255065f: rate-limit scripts and six booking validation checks passed, followed by **30 Node tests**; frontend **51 tests in 11 files** passed and production build succeeded. The earlier DB run records **11 nested scenarios plus parent = 12 passes**. These are recorded runs, not a fresh execution performed by this documentation update. Historical Part 2 runs reported 41 frontend tests; those counts do not describe the expanded current suite. Admin UI component coverage is not included in the 51-test suite.
 
-## Part 3 security review
+The workflow runs on pushes to Feature/Member-1 and Developer, and PRs targeting Developer. A direct Member-2 push alone does not trigger it. CI uses Node 24, npm ci, npm test (including security/logging), isolated MongoDB 7 authentication integration, frontend tests/build, Semgrep, then Compose HTTPS smoke checks. The Compose job depends on both test and scan jobs succeeding. The isolated authentication DB test does not prove the booking transaction path; the live application rehearsal supplies that evidence.
 
-| Threat | Implemented controls | Verification |
-| --- | --- | --- |
-| NoSQL injection and request tampering | The API allowlists request fields and validates input types. Authentication requires a string email. Booking accepts only a valid `gigId` and derives the client identity and price on the server. | The [booking integration report](Evidence/Testing/booking-integration-results.xml) records a rejected injection object. The [Part 3 backend CI log](Evidence/Part3/CI/01-backend-tests-passed.png) shows that malformed IDs and client-supplied prices and identities were rejected. |
-| Cross-site scripting (XSS) | Gig text validation rejects HTML delimiters and control characters. React renders gig data as text. The frontend preview and Nginx set a Content Security Policy that restricts scripts to the same origin and blocks inline scripts. Express applies Helmet security headers to API responses. | The [freelancer API report](Evidence/Testing/freelancer-api-results.xml) records a rejected script description. The [CSP evidence](Evidence/Security/client-csp-inline-script-blocked.png) shows an inline script being blocked. |
-| Authentication abuse and token misuse | Passwords are hashed with bcrypt. The API checks JWT signatures with HS256, checks token expiry, and loads the current user from MongoDB. Login rate limiting blocks repeated failed attempts. The browser and Compose checks verified HTTPS with a trusted local certificate. | The [admin API report](Evidence/Testing/admin-api-results.xml) records HTTP 401 for missing, invalid, and expired tokens. The [Part 3 backend CI log](Evidence/Part3/CI/01-backend-tests-passed.png) shows HTTP 429 after repeated failed login attempts. The [Chrome HTTPS evidence](Evidence/Part3/HTTPS/02-chrome-valid-https.png) shows a trusted TLS connection. |
-| Unauthorised access | Express checks roles and resource ownership on the server. Gig updates and deletions are restricted to the owner. Booking history, freelancer income, and transactions are scoped to the authenticated user's identity. | The [freelancer API report](Evidence/Testing/freelancer-api-results.xml) records rejected non-owner gig updates and deletions. The [booking integration report](Evidence/Testing/booking-integration-results.xml) records account isolation. The [admin API report](Evidence/Testing/admin-api-results.xml) records HTTP 403 for client and freelancer requests to admin endpoints. |
+Repository documentation records [CI run #33](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42648142206). Treat historical green runs as evidence of their commit only; verify the current PR/Developer head before final submission. Earlier failed-run/build-skip/recovery evidence is retained under Evidence/Part3/CI. CI currently uses a floating Semgrep image/rules and major-version action tags; production hardening should consider immutable pinning and reviewed updates.
 
-The Newman reports above are retained integration evidence from Part 2.
-The Part 3 workflow runs the backend rate-limit and booking-validation
-scripts, frontend tests, Semgrep, and the HTTPS Compose smoke checks.
+### Evidence navigation
 
-The local Docker Compose browser smoke test passed through Nginx HTTPS. A test client signed in and saw the new booking marked confirmed in My Bookings. After sign-out, reopening the protected bookings URL redirected to login. See the [confirmed booking screenshot](Evidence/Part3/HTTPS/03-compose-booking-confirmed.png).
+- [Member 2 evidence index](Evidence/Part3/Member2-Evidence-Index.md): tax, soft deletion/history, account comparison, security tests, cloud event correlation, frontend and development HTTPS.
+- [Docker](Evidence/Part3/Docker/), [HTTPS](Evidence/Part3/HTTPS/), [CI](Evidence/Part3/CI/) and [static analysis](Evidence/Part3/StaticAnalysis/).
+- [Security scenarios and CI evidence](docs/Member2-Security-Features.md).
+- Historical [Postman/API test instructions and reports](docs/README-HISTORY.md#tests-and-evidence).
 
-### Remaining limitations and integration checks
+### Dependency review
 
-- Server-side logout revokes the presented token. CI verified that
-  revocation persists across a MongoDB reconnection. In the local Compose
-  test through Nginx, the same token returned HTTP 200 from `/api/auth/me`
-  before browser logout and HTTP 401 afterward. [Token replay evidence](Evidence/Part3/Security/03-nginx-token-revocation-passed.png)
-- Verified per-IP registration rate limiting through Nginx using two
-  Docker clients with distinct IPs. Client A received ten HTTP 400
-  validation responses and HTTP 429 on request 11. Client B still
-  received HTTP 400 after Client A hit the limit. [Rate-limit evidence](Evidence/Part3/Security/04-nginx-per-ip-rate-limit-passed.png)
-- The local HTTPS evidence uses a locally trusted development certificate.
-  The Semgrep scan covers the files and rules reported in its summary, and the
-  open `minimatch` development dependency advisory is recorded in the audit
-  section above.
-- [GitHub Actions run #36](https://github.com/ST10294518/INSY7314-POE-Repo/actions/runs/42651327500) verified MongoDB-backed account lockout
-  and token revocation on `Developer` after PR #7 merged. All 11 scenarios
-  passed. Node reported 12 passes including the parent test, with zero
-  failures and zero skips.
-  See the [post-merge test log screenshot](Evidence/Part3/Security/02-developer-mongodb-security-integration-passed.png).
+Latest supplied clean-install output reported zero backend vulnerabilities and **four moderate frontend development-tool findings**. The historical audit identifies an ESLint/minimatch chain; this documentation update does not rerun or remediate that audit. Recheck `npm audit`, `npm --prefix client audit` and `npm --prefix client audit --omit=dev` on the submission commit. Do not equate a successful build/Semgrep scan with an absence of vulnerable dependencies or apply forced breaking upgrades without review.
 
+## Project-wide attribution and sources
 
-<!-- MEMBER2-FEEDBACK-START -->
-## Consolidated API endpoint reference
+See the [file-by-file attribution/reference register](docs/PROJECT-ATTRIBUTIONS.md) for backend, frontend, styles, tests, infrastructure and retained assets. Nearby source comments identify the official documentation checked during this final review. They do not invent original snippet provenance. Existing notices and assistance disclosures are preserved in source and [README history](docs/README-HISTORY.md#code-attribution-and-research-sources). Retain third-party copyright/licence notices and complete any earlier copied-snippet/asset provenance from the group's actual development history.
 
-This table is derived from src/app.js and all five route modules. Public means no JWT is required. Protected endpoints require Authorization: Bearer <token>. Admin is not an automatic bypass for owner or freelancer-only checks. Unknown paths return 404. There is no independent payment-create endpoint: booking creation records the simulated payment atomically. Update this table when logout or other new endpoints are added.
+## Demonstration and final sign-off
 
-| Method | Endpoint | Access | Behaviour / restriction |
-| --- | --- | --- | --- |
-| GET | / | Public | API status |
-| POST | /api/auth/register | Public | Creates client/freelancer only; registration limit |
-| POST | /api/auth/login | Public | Network + account throttling |
-| GET | /api/auth/me | Any authenticated role | Own profile |
-| POST | /api/auth/logout | Any authenticated role | Revoke the current token until expiry |
-| GET | /api/gigs | Public | Active gigs |
-| GET | /api/gigs/mine | Freelancer | Own active gigs |
-| GET | /api/gigs/:id | Public | Active gig details |
-| POST | /api/gigs | Freelancer | Create own gig |
-| PUT | /api/gigs/:id | Freelancer owner | Update own active gig |
-| DELETE | /api/gigs/:id | Freelancer owner | Soft-delete own gig |
-| POST | /api/bookings | Client | Own booking and simulated transaction; Idempotency-Key required |
-| GET | /api/bookings/mine | Client | Own booking history |
-| GET | /api/bookings/freelancer | Freelancer | Own received bookings |
-| GET | /api/bookings/:id | Authenticated booking participant | Controller requires matching client or freelancer ID; otherwise 404 |
-| GET | /api/transactions/income | Freelancer | Own income; includes estimate after tax package installation |
-| GET | /api/transactions/mine | Freelancer | Own transaction history |
-| GET | /api/admin/me | Admin | Verify admin access |
-| GET | /api/admin/overview | Admin | System overview |
-| GET | /api/admin/users | Admin | Paginated users |
-| GET | /api/admin/gigs | Admin | Paginated gigs |
-| GET | /api/admin/bookings | Admin | Paginated bookings |
-| GET | /api/admin/transactions | Admin | Paginated transactions |
+The recording should show the full application flow and matching transaction references. Docker, Atlas and cloud logs can support the Part 3 explanation. The prepared script is separate from the repository archive; recording and publication are not established by this documentation update. Add the final accessible video URL here after upload, test access while signed out, and avoid including credentials.
 
-## Authentication rate limiting for real users
-
-This section supersedes earlier descriptions of an IP-only five-attempt login limit.
-
-An IP identifies a network connection, not necessarily an individual. Shared campus Wi-Fi, households, offices, mobile carriers and proxies can place many accounts behind one IP. The old five-failure IP bucket could block unrelated users.
-
-This revision layers two independent login budgets: 200 requests per resolved IP/subnet per 15 minutes and five unsuccessful requests per normalized account email per 15 minutes. The numbers are project defaults, not OWASP-prescribed thresholds; tune using observed traffic and support data. Email normalization runs before the account limiter, matching the login lookup. Existing and nonexistent account names follow the same limiter path. SHA-256 avoids raw email keys but is not encryption or protection against email guessing. Successful responses are removed from the account failure count; they do not reset preceding failures. Concurrent in-flight requests can temporarily consume the budget. IP limits count every login request, including malformed inputs. Registration retains a distinct 10-per-hour network cap; this still affects shared networks and needs capacity planning or a verified enrolment flow.
-
-The account bucket spans source IPs, so rotating IPs does not reset its budget. Different accounts sharing an IP have separate five-failure budgets but still share the larger network ceiling. Deliberate account throttling can deny access to a victim; recovery, MFA, risk-based challenges and monitoring are further mitigations. This does not replace the separately planned persistent account-lockout feature.
-
-### Proxy and deployment configuration
-
-Express defaults to trusting no proxy. The supplied Nginx proxy does not forward client IP headers, so Docker traffic may currently share the proxy IP. Before a real-user rollout, Member 1 must configure Nginx to overwrite X-Forwarded-For with the client address at a controlled public edge, then configure Express trust proxy with only the actual proxy addresses/subnets. Do not use trust proxy = true blindly. Do not trust a client-supplied header directly. If there are upstream load balancers, map the complete trusted chain and header rewriting policy first. Verify req.ip with two clients and a spoofed forwarding header. Do not log tokens in diagnostic endpoints.
-
-The default MemoryStore is process-local and resets on restart. Multiple replicas need an external shared store with independent key prefixes for each limiter. Persistent account protection, monitoring and store-failure policy must be designed and verified before claiming production readiness. Do not whitelist shared public IPs. Keep IPv6 subnet-aware handling via the library's default IP key generator and ipKeyGenerator fallback.
-
-### Evidence and tests
-
-Run npm test and node --test src/tests/authSharedIp.test.cjs. Capture account A's sixth failed request returning 429, account B still reaching authentication on the same IP, a successful login not consuming the failure allowance, and a rate-limit response with Retry-After. The isolated test uses mocked authentication, not real user credentials. Perform real-account, proxy and multi-instance checks separately. Add the new test command to CI in coordination with Member 1.
-
-## Code attribution and research sources
-
-Attribution is required for adapted code and external assistance, not just a general bibliography. Retain original copyright and licence notices. The group must verify and complete earlier code provenance; this section does not assert that unreviewed code is original.
-
-| Scope | Source / assistance | Use and remaining verification |
-| --- | --- | --- |
-| Soft deletion package: Gig model, gig/booking/admin controllers | OpenAI ChatGPT assistance in this project conversation, 8 November 2026 | Generated/adapted from supplied group code; existing tests passed locally per group terminal output; database history evidence still required |
-| Tax estimate utility, income controller/UI and supplied tests | OpenAI ChatGPT assistance in this project conversation, 8 November 2026 | Illustrative 20% coursework rule, not SARS law; installation and application evidence must be recorded |
-| Revised authRateLimiter.js, authRoutes.js and shared-IP tests | OpenAI ChatGPT assistance, 8 November 2026; express-rate-limit and OWASP documentation below | Project-specific implementation adapted from documented APIs and design guidance; group must run supplied tests |
-| Existing Part 1/2 code, assets and Member 1 infrastructure | Group members must identify actual authors, tutorials, repositories, AI assistance and licences | Provenance not established by this patch; replace this row with verified entries before submission |
-
-When code is copied or adapted, add a nearby comment naming the source and adaptation, and include author/organisation, title, URL, access date and licence where applicable in this register. Attribute images/icons separately. Package dependencies do not establish provenance for copied snippets. Review the institution's AI-use policy and disclose assistance accurately. Attribution does not guarantee reversal of the earlier mark deduction.
-
-### References (accessed 8 November 2026)
-
-- OWASP (n.d.) Authentication Cheat Sheet. https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html (login throttling and account-level counters).
-- OWASP (n.d.) Bot Management and Anti-Automation Cheat Sheet. https://cheatsheetseries.owasp.org/cheatsheets/Bot_Management_and_Anti-Automation_Cheat_Sheet.html (independent account and network budgets).
-- express-rate-limit contributors (n.d.) Configuration. https://express-rate-limit.mintlify.app/reference/configuration (key generation, successful-request handling and stores).
-- express-rate-limit contributors (n.d.) Error codes. https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ (proxy/IPv6 checks).
-- Express contributors (n.d.) Express behind proxies. https://expressjs.com/en/guide/behind-proxies/ (trusted proxy topology and forwarded headers).
-<!-- MEMBER2-FEEDBACK-END -->
-
-
-<!-- MEMBER2-SECURITY-FEATURES -->
-## Additional authentication security features
-
-Implemented persistent temporary account lockout and MongoDB-backed per-token revocation on logout. See [Security feature implementation, tests and limitations](docs/Member2-Security-Features.md). New endpoint: POST /api/auth/logout, available to any authenticated role. Lockout persists across API restarts; logout revokes only the presented token. CI runs the authentication security unit tests and the isolated MongoDB integration suite. See the post-merge results above. The local Compose browser smoke test and token replay check through Nginx also passed.
-
-
-<!-- MEMBER2-LOGGING-MONITORING -->
-## Logging and monitoring
-
-The API emits structured JSON for authentication, bookings, committed simulated transactions, gig changes, logout, rate limiting and errors. Each request has a generated request ID. Secrets, request bodies, raw errors and query strings are excluded. Optional Better Stack HTTPS ingestion supports cloud search and monitoring. See [Logging implementation, cloud setup and evidence checklist](docs/Member2-Logging-Monitoring.md). Cloud connectivity and real-event delivery must be verified separately; pending Atlas connectivity still blocks database-dependent evidence. Logging uses bounded best-effort delivery and is not a guaranteed financial audit trail.
+Before submitting: confirm current CI checks, review the dependency findings and source provenance, ensure evidence matches the demonstrated version, add the video link, and complete team sign-off. For Atlas DNS/TLS issues inspect network access, database permissions, DNS and container connectivity without disabling TLS verification. A temporary successful retry alone is not proof of a permanent network fix.

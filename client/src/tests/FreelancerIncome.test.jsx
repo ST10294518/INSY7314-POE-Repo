@@ -1,3 +1,8 @@
+// Documentation references added during final review (9 November 2026).
+// VITEST: https://vitest.dev/guide/
+// RTL: https://testing-library.com/docs/react-testing-library/intro/
+// REACT: https://react.dev/reference/react
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'

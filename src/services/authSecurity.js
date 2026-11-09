@@ -1,3 +1,8 @@
+// Documentation references added during final review (9 November 2026).
+// AUTH: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+// ATOMIC: https://mongoosejs.com/docs/tutorials/findoneandupdate.html
+// CRYPTO: https://nodejs.org/api/crypto.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 // References: OWASP Authentication Cheat Sheet; Mongoose atomic update APIs.
 // https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
 // https://mongoosejs.com/docs/tutorials/findoneandupdate.html

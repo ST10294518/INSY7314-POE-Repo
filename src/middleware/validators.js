@@ -1,4 +1,7 @@
-﻿const { body, validationResult } = require('express-validator');
+﻿// Documentation references added during final review (9 November 2026).
+// VAL: https://express-validator.github.io/docs/
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
+const { body, validationResult } = require('express-validator');
 
 function requestBodyRule(allowedFields) {
   return body()

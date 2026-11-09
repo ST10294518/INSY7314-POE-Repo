@@ -1,3 +1,7 @@
+// Documentation references added during final review (9 November 2026).
+// NODETEST: https://nodejs.org/api/test.html
+// EXP: https://expressjs.com/en/5x/api/
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const {estimateTax} = require('../utils/taxEstimate');

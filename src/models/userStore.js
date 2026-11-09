@@ -1,3 +1,6 @@
+// Documentation references added during final review (9 November 2026).
+// FS: https://nodejs.org/api/fs.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 const fs = require('fs');
 const path = require('path');
 

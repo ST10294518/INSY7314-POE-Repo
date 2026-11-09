@@ -1,3 +1,7 @@
+// Documentation references added during final review (9 November 2026).
+// NODETEST: https://nodejs.org/api/test.html
+// EXP: https://expressjs.com/en/5x/api/
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 // Integration tests must not export synthetic events to a real cloud source.
 process.env.BETTER_STACK_SOURCE_TOKEN = '';
 process.env.BETTER_STACK_INGESTING_HOST = '';

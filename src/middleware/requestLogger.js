@@ -1,3 +1,8 @@
+// Documentation references added during final review (9 November 2026).
+// LOG: https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html
+// CLOUD: https://betterstack.com/docs/logs/ingesting-data/http/logs/
+// CRYPTO: https://nodejs.org/api/crypto.html
+// See docs/PROJECT-ATTRIBUTIONS.md for scope and provenance distinctions.
 const {randomUUID}=require('node:crypto');
 const {logger}=require('../services/logger');
 const STATIC_PATHS=new Set(['/','/api/auth/login','/api/auth/register','/api/auth/me','/api/auth/logout','/api/gigs','/api/gigs/mine','/api/bookings','/api/bookings/mine','/api/bookings/freelancer','/api/transactions/income','/api/transactions/mine','/api/admin/me','/api/admin/overview','/api/admin/users','/api/admin/gigs','/api/admin/bookings','/api/admin/transactions']);
