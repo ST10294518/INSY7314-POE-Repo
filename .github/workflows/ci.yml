@@ -39,6 +39,25 @@ jobs:
       - name: Run backend tests
         run: npm test
 
+      - name: Run MongoDB security integration tests
+        shell: bash
+        env:
+          SECURITY_TEST_MONGODB_URI: mongodb://127.0.0.1:27018/hhst_kairah_security
+        run: |
+          docker run --detach --rm --name hustlehub-security-mongo \
+            --publish 127.0.0.1:27018:27017 mongo:7.0
+          trap 'docker stop hustlehub-security-mongo >/dev/null 2>&1 || true' EXIT
+
+          timeout 60s bash -c '
+            until docker exec hustlehub-security-mongo mongosh --quiet \
+              --eval "quit(db.adminCommand({ ping: 1 }).ok === 1 ? 0 : 1)" \
+              >/dev/null 2>&1; do
+              sleep 2
+            done
+          '
+
+          node scripts/run-security-integration.js
+
       - name: Run frontend tests
         run: npm --prefix client test
 
