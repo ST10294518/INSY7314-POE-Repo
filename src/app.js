@@ -16,6 +16,11 @@ const {
 
 const app = express();
 
+const trustedProxyIp = process.env.TRUSTED_PROXY_IP;
+if (trustedProxyIp) {
+  app.set('trust proxy', trustedProxyIp);
+}
+
 app.disable('x-powered-by');
 
 app.use(
